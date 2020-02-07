@@ -1,0 +1,8 @@
+channels:
+  - bioconda
+  - conda-forge
+  - anaconda
+dependencies:
+  - r-lme4
+  - perl
+  - r-factominer
