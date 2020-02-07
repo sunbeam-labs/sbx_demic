@@ -1,11 +1,10 @@
 # -*- mode: Snakemake -*-
 
 from sunbeamlib import samtools
+import os
 
-# TODO
-# ---- DEMIC
 TARGET_DEMIC = [
-    str(MAPPING_FP/'demic'/'placeholder')
+    str(MAPPING_FP/'demic'/'DEMIC_OUT')
     ]
 
 rule all_demic:
@@ -37,9 +36,9 @@ rule bowtie2:
         "sbx_demic_env.yml"
     shell:
         """
-            bowtie2 -q -x {input.db} \
-            -1 {input.pair[0]} -2 {input.pair[1]} -p {threads} \
-            -S {output}
+        bowtie2 -q -x {input.db} \
+        -1 {input.pair[0]} -2 {input.pair[1]} -p {threads} \
+        -S {output}
         """
 
 rule samtools_sort:
@@ -61,11 +60,15 @@ rule samtools_sort:
 # and how to get the directory of:
 #       str(Cfg['sbx_demic']['contigs_fasta'])
 # because those are the inputs of the next rule
+#
+# Maybe this will work:
+#
+# os.path.dirname
 
 rule run_demic:
     input:
-        sam_dir = blabla
-        fasta_dir = blabla
+        sam_dir = str(MAPPING_FP/'demic'/'sorted')
+        fasta_dir = os.path.dirname(str(Cfg['sbx_demic']['contigs_fasta']))
     output:
         str(MAPPING_FP/'demic'/'DEMIC_OUT')
     params:
@@ -76,7 +79,7 @@ rule run_demic:
         "sbx_demic_env.yml"
     shell:
         """
-        DEMIC.pl --output_all {params.keep_all} \
+        perl DEMIC.pl --output_all {params.keep_all} \
         --thread_num {threads} \
         -S {input.sam_dir} -F {input.fasta_dir} \
         -O {output}
