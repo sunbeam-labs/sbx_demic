@@ -4,14 +4,14 @@ from sunbeamlib import samtools
 import os
 
 TARGET_DEMIC = [
-    str(MAPPING_FP/'demic'/'DEMIC_OUT')
+    str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
     ]
 
 rule all_demic:
     input:
         TARGET_DEMIC
 
-rule bowtie2-build:
+rule bowtie2_build:
     input:
         str(Cfg['sbx_demic']['contigs_fasta'])
     output:
@@ -67,7 +67,7 @@ rule samtools_sort:
 
 rule run_demic:
     input:
-        sam_dir = str(MAPPING_FP/'demic'/'sorted')
+        sam_dir = str(MAPPING_FP/'demic'/'sorted'),
         fasta_dir = os.path.dirname(str(Cfg['sbx_demic']['contigs_fasta']))
     output:
         str(MAPPING_FP/'demic'/'DEMIC_OUT')
