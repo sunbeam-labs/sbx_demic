@@ -19,7 +19,10 @@
 
 ## References
 
-Sunbeam: https://github.com/sunbeam-labs/sunbeam
-DEMIC software: https://sourceforge.net/projects/demic/files/
-DEMIC publication: https://www.nature.com/articles/s41592-018-0182-0
-isolated Conda environment: http://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#integrated-package-management
+- Sunbeam: https://github.com/sunbeam-labs/sunbeam
+
+- DEMIC software: https://sourceforge.net/projects/demic/files/
+
+- DEMIC publication: https://www.nature.com/articles/s41592-018-0182-0
+
+- isolated Conda environment: http://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#integrated-package-management
