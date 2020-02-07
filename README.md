@@ -1,6 +1,6 @@
 # sbx_demic
 
-[Sunbeam] extension for [DEMIC] (https://sourceforge.net/projects/demic/files/)
+[Sunbeam](https://github.com/sunbeam-labs/sunbeam) extension for [DEMIC](https://sourceforge.net/projects/demic/files/)
 
 *Important* -- This was tested with modified demic scripts version 1.0.2, please check the sourceforge.net site for any updates. Mainly, the only change I made was to save a couple of R data files for "manual" analysis in Rstudio if one so desires. 
 
