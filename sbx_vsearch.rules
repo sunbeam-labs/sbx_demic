@@ -1,0 +1,181 @@
+# -*- mode: Snakemake -*-
+
+# ---- VSEARCH
+TARGET_VSEARCH = [
+    expand(str(MAPPING_FP/'vsearch'/'{sample}_report.tsv'), sample = Samples.keys()),
+    expand(str(MAPPING_FP/'vsearch'/'{sample}.fasta'), sample = Samples.keys())
+    ]
+
+#TARGET_VSEARCH_REPORT = [str(MAPPING_FP/'vsearch'/'taxonomic_assignments.tsv')]
+
+rule all_vsearch:
+    input:
+        TARGET_VSEARCH
+
+#Vsearch can not do paired-end so we split forward and reverse reads into two commands
+#Vsearch has to have fasta vs. fasta for the usearch_global so first we do a --fastx_filter without any parameters, this just converts the fastq.gz to fasta
+
+#maybe we need two rules
+#one to convert and combine
+#and one to do the --usearch_global
+
+#this gets an oom error:
+#cat $(vsearch --fastx_filter {input.query[0]} --fastaout -) \
+#    $(vsearch --fastx_filter {input.query[1]} --fastaout -) > \
+#    {output}
+
+rule build_udb_index:
+    input:
+        str(Cfg['sbx_vsearch']['db'])
+    output:
+        str(Cfg['sbx_vsearch']['db']+'.udb')
+    shell:
+        "vsearch --makeudb_usearch {input} --output {output}"
+
+rule convert_and_cat:
+    input:
+        pair = expand(str(QC_FP/'decontam'/'{sample}_{rp}.fastq.gz'),
+                      sample = "{sample}",
+                      rp = Pairs),
+    output:
+        combined = str(QC_FP/'decontam'/'{sample}.fasta')
+    shell:
+        """
+        vsearch --fastx_filter {input.pair[0]} --fastaout {input.pair[0]}tempfasta
+        vsearch --fastx_filter {input.pair[1]} --fastaout {input.pair[1]}tempfasta
+
+        cat {input.pair[0]}tempfasta {input.pair[1]}tempfasta > {output.combined}
+        rm {input.pair[0]}tempfasta {input.pair[1]}tempfasta
+        """
+
+rule run_vsearch:
+    input:
+        query = expand(str(QC_FP/'decontam'/'{{sample}}.fasta')),
+        db = str(Cfg['sbx_vsearch']['db']+'.udb')
+    output:
+        reports = str(MAPPING_FP/'vsearch'/'{sample}_report.tsv'),
+        alignments = str(MAPPING_FP/'vsearch'/'{sample}.fasta')
+    threads:
+        Cfg['sbx_vsearch']['threads']
+    params:
+        iddef = str(Cfg['sbx_vsearch']['iddef']),
+        min_id = str(Cfg['sbx_vsearch']['min_id']),
+        userfields = str(Cfg['sbx_vsearch']['userfields']),
+        weak_id = str(Cfg['sbx_vsearch']['weak_id']),
+        fasta_width = str(Cfg['sbx_vsearch']['fasta_width'])
+    shell:
+        """
+            vsearch --usearch_global {input.query} \
+            --db  {input.db} \
+            --userout {output.reports} \
+            --matched {output.alignments} \
+            --threads {threads} \
+            --iddef {params.iddef} \
+            --id {params.min_id} \
+            --userfields {params.userfields} \
+            --weak_id {params.weak_id} \
+            --fasta_width {params.fasta_width}
+        """
+#this was tested to work:
+#--fastx_filter /scr1/users/danielsg/bello/sunbeam_output/qc/decontam/VenFeb16.106_1.fastq.gz --fastaout - | vsearch --usearch_global - {rest of stuff}
+
+#TODO: summary of results
+# An all-samples-in-one summary table, with samples on columns and taxa on
+# rows.
+#rule taxonomic_assignment_report:
+#    """ generate vsearch taxonomic assignment table """
+#    output:
+#        str(MAPPING_FP/'vsearch'/'taxonomic_assignments.tsv')
+#    input:
+#        fps = expand(str(MAPPING_FP/'vsearch'/'review'/'{sample}_review.txt'), sample = Samples.keys())
+#    run:
+#        vsearch_make_report(input.fps, output[0])
+#
+
+
+#TODO: use this as a template for making a --makeudb_usearch
+# Make sure vsearch has downloaded its database and indexed it for bowtie2,
+# storing the files inside the Sunbeam environment in opt/vsearch_databases,
+# and symlink to it in the vsearch output dir.
+#rule vsearch_database:
+#    output:
+#        dbdir = str(MAPPING_FP/'vsearch'/'databases')
+#    conda:
+#        "sbx_vsearch_env.yml"
+#    params:
+#        conda_prefix = CONDA_PREFIX
+#    shell:
+#        """
+#            # Snakemake by default fails the whole shell script if any command
+#            # within a pipe has a non-zero exit status.  Disabling that here.
+#            set +o pipefail
+#
+#            # Link the two possible database locations (later versions of
+#            # vsearch2 use "vsearch_databases") from the metphlan
+#            # environment back out to the Sunbeam environment.
+#            # This allows easier access to the database on disk, whether it's
+#            # supplied automatically by vsearch2 or manually before running
+#            # these rules.
+#            path_db="{params.conda_prefix}/opt/vsearch_databases"
+#            mkdir -p "$path_db"
+#            ln -sfT "$path_db" "$CONDA_PREFIX"/bin/databases
+#            ln -sfT "$path_db" "$CONDA_PREFIX"/bin/vsearch_databases
+#
+#            function lsbt2 {{
+#            ls -1 "$CONDA_PREFIX"/bin/databases/mpa_v20_m200{{.{{1..4}},.rev.{{1..2}}}}.bt2 2> /dev/null | wc -l
+#            }}
+#            bt2=$(lsbt2)
+#            if [[ "$bt2" != 6 ]]
+#            then
+#                vsearch2.py --install
+#            fi
+#            # To track completion of this task, place a symlink as an output
+#            # file pointing into the database location inside the vsearch
+#            # environment.
+#            bt2=$(lsbt2)
+#            if [[ "$bt2" == 6 ]]
+#            then
+#                ln -sf "$CONDA_PREFIX/bin/databases" "{output.dbdir}"
+#            fi
+#        """
+
+##################### Helper functions
+#
+#def vsearch_make_report(fps_input, fp_output):
+#    kos = []
+#    for fp in fps_input:
+#        # filter out the files that don't have any results
+#        if os.path.getsize(fp) > 1:
+#            # build pandas dataframes for each file of results
+#            kos.append(parse_results(fp,".txt"))
+#    # merge the column results
+#    kos = pandas.concat(kos, axis=1)
+#
+#    # write them to file. Replace NAs (due to merging) with 0.
+#    kos.to_csv(fp_output, sep='\t', na_rep=0, index_label="Term")
+#
+#def parse_results(fp, input_suffix):
+#    """ Return a DataFrame containing the results of one sample"""
+#    sample_name = os.path.basename(fp).rsplit(input_suffix)[0]
+#    return pandas.read_csv(fp, sep='\t', index_col=0, names=[sample_name], skiprows=1)
+#
+## Chunyu's function to filter to just species-level classifications, excluding
+## strain-level.
+#def review_output(raw_fp, output_fp):
+#     with open(raw_fp) as f:
+#        output_lines = f.read().splitlines(True)
+#        
+#        if len(output_lines) < 2:
+#            raise ValueError("Metaphlan output has fewer than 2 lines.")
+#        elif len(output_lines) == 2:
+#            revised_output_lines = "".join(output_lines)
+#        else:
+#            header = output_lines.pop(0)
+#            revised_output_lines = [header]
+#            for line in output_lines:
+#                if (("s__" in line) and not ("t__" in line)) or (("unclassified" in line) and not ("t__" in line)):
+#                    revised_output_lines.append(line)
+#            revised_output_lines = "".join(revised_output_lines)
+#        
+#        with open(output_fp, 'w') as f:
+#            f.write(revised_output_lines)
