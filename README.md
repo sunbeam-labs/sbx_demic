@@ -2,7 +2,7 @@
 
 [Sunbeam] extension for [DEMIC] (https://sourceforge.net/projects/demic/files/)
 
-*Important* The demic scripts under /demic are v1.0.2, please check the sourceforge.net site for any updates 
+*Important* This was tested with modified demic scripts version 1.0.2, please check the sourceforge.net site for any updates. Mainly, the only change I made was to save a couple of R data files for "manual" analysis in Rstudio if one so desires. 
 
 ## Installation
 
@@ -10,7 +10,7 @@
 2. cp sbx_demic $SUNBEAM_DIR/extensions/
 3. cat sunbeam/extensions/sbx_demic/config.yml >> sunbeam_config.yml (the config.yml that your are using for your given project)
 4. edit sunbeam_config.yml to have desired parameters (important: contigs_dir points to your pre-assembled metagenome)
-5. copy demic scripts ([DEMIC.pl](/demic/DEMIC.pl), estGrowthRate1.0.2.R, and testR1.0.2.R) to your local bin directory (e.g. $HOME/bin)
+5. copy demic scripts ([DEMIC.pl](/demic_v1.0.2/DEMIC.pl), [estGrowthRate1.0.2.R](/demic_v1.0.2/estGrowthRate1.0.2.R), and [testR1.0.2.R](/demic_v1.0.2/testR1.0.2.R)) to your local bin directory (e.g. $HOME/bin)
 
 ## Running
 
