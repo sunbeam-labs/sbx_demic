@@ -285,6 +285,9 @@ colnames(X) <- c("logCov", "GC", "sample", "contig", "length")
 tag_permu <- 0
 
 Y<-X
+
+save.image(file.path(dirname(output),"savepoint_demic.RData"))
+
 # Attempt the default iteration for contigs
 if( length(levels(X$contig)) >= 20 & length(levels(X$sample)) >= 3 ){
   cor_cutoff <- 0.98
@@ -524,4 +527,7 @@ if (tag_permu == 0) {
 
 # Output to .eptr
 write.table(estPTRs2, output, sep="\t", quote=FALSE)  #paste(args[1],".eptr",sep="")
+
+# Edit by scottdaniel25@gmail.com
+save.image(file.path(dirname(output),"finished_demic.RData"))
 
