@@ -1,5 +1,5 @@
 sbx_demic:
-  contigs: "" #--fasta_dir
+  contigs_fasta: "" #--fasta_dir
   threads: 8 #--thread_num
   keepall: FALSE #--output_all
 
