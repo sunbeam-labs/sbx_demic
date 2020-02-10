@@ -1,6 +1,9 @@
 name: demic
 channels:
-  - conda-forge
+    - conda-forge
+    - bioconda
 dependencies:
-  - r-lme4
-  - r-factominer
+    - bowtie2
+    - samtools
+    - r-lme4
+    - r-factominer

@@ -36,13 +36,13 @@ rule bowtie2:
     threads:
         Cfg['sbx_demic']['threads']
     params:
-        db_prefix = str(Cfg['sbx_demic']['contigs_fasta'])
+        db_basename = str(Cfg['sbx_demic']['contigs_fasta'])
     conda:
         "sbx_demic_env.yml"
     shell:
         """
-        bowtie2 -q -x {params.de_prefix} \
-        -1 {input.pair[0]} -2 {input.pair[1]} -p {threads} \
+        bowtie2 -q -x {params.db_basename} \
+        -1 {input.reads[0]} -2 {input.reads[1]} -p {threads} \
         -S {output}
         """
 
