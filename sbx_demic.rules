@@ -14,29 +14,34 @@ rule all_demic:
 rule bowtie2_build:
     input:
         str(Cfg['sbx_demic']['contigs_fasta'])
-    output:
-        str(Cfg['sbx_demic']['contigs_fasta'])
+    params:
+        basename = str(Cfg['sbx_demic']['contigs_fasta'])
     threads:
         Cfg['sbx_demic']['threads']
+    output:
+        touch(str(Cfg['sbx_demic']['contigs_fasta'])+'.done')
     shell:
-        "bowtie2-build --threads {threads} {input} {output}"
+        "bowtie2-build --threads {threads} {input} {params.basename}"
 
 # Run bowtie2 with index
 rule bowtie2:
     output:
         str(MAPPING_FP/'demic'/'raw'/'{sample}.sam')
     input:
-        pair = expand(str(QC_FP/'decontam'/'{sample}_{rp}.fastq.gz'),
-                      sample = "{sample}",
-                      rp = Pairs),
-        db = str(Cfg['sbx_demic']['contigs_fasta'])
+        rules.bowtie2_build.output,
+        reads = expand(
+            str(QC_FP/'decontam'/'{sample}_{rp}.fastq.gz'),
+            sample = Samples.keys(),
+            rp = Pairs)
     threads:
         Cfg['sbx_demic']['threads']
+    params:
+        db_prefix = str(Cfg['sbx_demic']['contigs_fasta'])
     conda:
         "sbx_demic_env.yml"
     shell:
         """
-        bowtie2 -q -x {input.db} \
+        bowtie2 -q -x {params.de_prefix} \
         -1 {input.pair[0]} -2 {input.pair[1]} -p {threads} \
         -S {output}
         """
@@ -67,11 +72,13 @@ rule samtools_sort:
 
 rule run_demic:
     input:
-        sam_dir = str(MAPPING_FP/'demic'/'sorted'),
-        fasta_dir = os.path.dirname(str(Cfg['sbx_demic']['contigs_fasta']))
+        expand(str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam'),
+        sample = Samples.keys())
     output:
-        str(MAPPING_FP/'demic'/'DEMIC_OUT')
+        str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
     params:
+        sam_dir = str(MAPPING_FP/'demic'/'sorted'),
+        fasta_dir = Cfg['sbx_demic']['binned_dir'],
         keep_all = Cfg['sbx_demic']['keepall']
     threads:
         Cfg['sbx_demic']['threads']
@@ -81,7 +88,7 @@ rule run_demic:
         """
         perl DEMIC.pl --output_all {params.keep_all} \
         --thread_num {threads} \
-        -S {input.sam_dir} -F {input.fasta_dir} \
-        -O {output}
+        -S {params.sam_dir} -F {params.fasta_dir} \
+        -O $(dirname {output})
         """
 
