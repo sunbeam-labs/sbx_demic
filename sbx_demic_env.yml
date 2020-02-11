@@ -7,4 +7,5 @@ dependencies:
     - samtools
     - r-lme4
     - r-factominer
+    - r-reshape2
     - maxbin2
