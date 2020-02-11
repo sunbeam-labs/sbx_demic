@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 ############################################################################
 # Copyright (c) 2016-2018 DBEI, UPENN
 # All Rights Reserved
