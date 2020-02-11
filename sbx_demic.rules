@@ -87,7 +87,8 @@ rule run_demic:
     params:
         sam_dir = str(MAPPING_FP/'demic'/'sorted'),
         fasta_dir = Cfg['sbx_demic']['binned_dir'],
-        keep_all = Cfg['sbx_demic']['keepall']
+        keep_all = Cfg['sbx_demic']['keepall'],
+        extras = Cfg['sbx_demic']['extras']
     threads:
         Cfg['sbx_demic']['threads']
     conda:
@@ -96,7 +97,7 @@ rule run_demic:
         str(MAPPING_FP/'demic'/'logs'/'demic.error')
     shell:
         """
-        DEMIC.pl --output_all {params.keep_all} \
+        DEMIC.pl --output_all {params.keep_all} {params.extras} \
         --thread_num {threads} \
         -S {params.sam_dir} -F {params.fasta_dir} \
         -O $(dirname {output}) 2> {log}
