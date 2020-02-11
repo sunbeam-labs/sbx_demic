@@ -5,6 +5,7 @@ sbx_demic:
   binned_dir: "~/assembly/coassembly/max_bin" #--fasta_dir
   threads: 4 #--thread_num
   keepall: FALSE #--output_all
+  extra: "" #other parameters passed to DEMIC.pl
 
 #Full arguments of demic:
 #The arguments of DEMIC are as follows:
