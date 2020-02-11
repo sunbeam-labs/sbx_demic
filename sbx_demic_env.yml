@@ -1,4 +1,4 @@
-name: demic
+#name: demic
 channels:
     - conda-forge
     - bioconda

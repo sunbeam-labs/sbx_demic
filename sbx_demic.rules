@@ -20,6 +20,8 @@ rule bowtie2_build:
         Cfg['sbx_demic']['threads']
     output:
         touch(str(Cfg['sbx_demic']['contigs_fasta'])+'.done')
+    conda:
+        "sbx_demic_env.yml"
     shell:
         "bowtie2-build --threads {threads} {input} {params.basename}"
 
@@ -53,6 +55,8 @@ rule samtools_sort:
         str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam')
     threads:
         Cfg['sbx_demic']['threads']
+    conda:
+        "sbx_demic_env.yml"
     shell:
         """
         samtools view -@ {threads} -bS {input} | samtools sort -@ {threads} - {input}_sorted
