@@ -1,8 +1,8 @@
 sbx_demic:
-# NOTE: if this is not set it should pick it up from sbx_coassembly
-  contigs_fasta: "/scr1/users/danielsg/recongiggering_usda12and22/sunbeam_output/assembly/coassembly/all_final_contigs.fa" #e.g. all.final.contigs.fasta
-# TODO: this binned_dir should be auto-set in the binning part of sbx_coassembly
-  binned_dir: "/scr1/users/danielsg/recongiggering_usda12and22/sunbeam_output/assembly/coassembly/max_bin" #--fasta_dir
+# TODO: if this is not set it should pick it up from sbx_coassembly
+  contigs_fasta: "~/assembly/coassembly/all_final_contigs.fa" #e.g. all.final.contigs.fasta
+# TODO: this binned_dir should be auto-set in the binning part of sbx_coassembly or just integrate it in sbx_demic
+  binned_dir: "~/assembly/coassembly/max_bin" #--fasta_dir
   threads: 4 #--thread_num
   keepall: FALSE #--output_all
 

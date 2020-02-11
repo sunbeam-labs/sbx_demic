@@ -52,15 +52,19 @@ rule samtools_sort:
     input:
         str(MAPPING_FP/'demic'/'raw'/'{sample}.sam')
     output:
-        str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam')
+        temp_files = temp(str(MAPPING_FP/'demic'/'sorted'/'{sample}.bam')),
+        sorted_files = str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam')
     threads:
         Cfg['sbx_demic']['threads']
     conda:
         "sbx_demic_env.yml"
+    log:
+        str(MAPPING_FP/'demic'/'logs'/'samtools_{sample}.log')
     shell:
         """
-        samtools view -@ {threads} -bS {input} | samtools sort -@ {threads} - {input}_sorted
-        samtools view -@ {threads} -h {input}_sorted.bam > {output} 
+        echo "converting to bam, sorting, and converting back to sam"
+        samtools view -@ {threads} -bS {input} | samtools sort -@ {threads} - {output.temp_files} 2> {log}
+        samtools view -@ {threads} -h {output.temp_files} > {output.sorted_files} 2>> {log}
         """
 
 # TODO
