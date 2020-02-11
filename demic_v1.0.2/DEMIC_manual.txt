@@ -57,7 +57,7 @@ For example, you can use the following commands to alignment reads in sample1 an
 
 Sort the alignment and output to SAM_sorted/sample1_sort.sam:
 
-	samtools view -bS SAM/sample1.sam | samtools sort - SAM/sample1_sort
+	samtools view -bS SAM/sample1.sam | samtools sort - -o SAM/sample1_sort
 	samtools view -h SAM/sample1_sort.bam > SAM_sorted/sample1_sort.sam
 
 Please do this for .sam files of all samples.
