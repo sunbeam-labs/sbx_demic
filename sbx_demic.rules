@@ -21,7 +21,7 @@ rule bowtie2_build:
     output:
         touch(str(Cfg['sbx_demic']['contigs_fasta'])+'.done')
     conda:
-        "sbx_demic_env.yml"
+        "envs/bowtie2_env.yml"
     shell:
         "bowtie2-build --threads {threads} {input} {params.basename}"
 
@@ -40,7 +40,7 @@ rule bowtie2:
     params:
         db_basename = str(Cfg['sbx_demic']['contigs_fasta'])
     conda:
-        "sbx_demic_env.yml"
+        "envs/bowtie2_env.yml"
     shell:
         """
         bowtie2 -q -x {params.db_basename} \
@@ -57,7 +57,7 @@ rule samtools_sort:
     threads:
         Cfg['sbx_demic']['threads']
     conda:
-        "sbx_demic_env.yml"
+        "envs/samtools_env.yml"
     log:
         str(MAPPING_FP/'demic'/'logs'/'samtools_{sample}.error')
     shell:
@@ -92,7 +92,7 @@ rule run_demic:
     threads:
         Cfg['sbx_demic']['threads']
     conda:
-        "sbx_demic_env.yml"
+        "envs/demic_env.yml"
     log:
         str(MAPPING_FP/'demic'/'logs'/'demic.error')
     shell:

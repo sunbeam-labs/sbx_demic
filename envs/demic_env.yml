@@ -1,0 +1,8 @@
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - conda-forge::r-lme4=1.1_27.1
+    - conda-forge::r-factominer=2.4
+    - conda-forge::r-reshape2=1.4.4
+    - bioconda::maxbin2=2.2.7

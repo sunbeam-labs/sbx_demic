@@ -243,9 +243,9 @@ Arguments:
 		my $status = system($testR_command);
 		my $exit_code = ($status >> 8) & 0xff;
 		if ($exit_code != 0) {
-			push @die_reason, "Please make sure R 3.3.1 or above with package \"lme4\" and \"FactoMineR\" has been installed already.\n";
+			push @die_reason, "Please make sure R 3.3.1 or above with package \"lme4\" and \"FactoMineR\" has been installed already.\nNonzero exit code from testR script.\n";
 		} elsif (!-e $R_out) {
-			push @die_reason, "Please make sure R 3.3.1 or above with package \"lme4\" and \"FactoMineR\" has been installed already.\n";
+			push @die_reason, "Please make sure R 3.3.1 or above with package \"lme4\" and \"FactoMineR\" has been installed already.\nNo output from testR script.\n";
 		} else {
 			open TESTR, "<", $R_out;
 			my @R_info;
@@ -253,7 +253,7 @@ Arguments:
 				chomp;
 				push @R_info, $_;
 			}
-			if ($R_info[0] < 3 or $R_info[1] < 3.1 or !defined $R_info[2] or !defined $R_info[3]) {
+			if ($R_info[0] < 3 or ($R_info[0] == 3 and $R_info[1] < 3.1) or !defined $R_info[2] or !defined $R_info[3]) {
 				push @die_reason, "Please make sure R 3.3.1 or above with package \"lme4\" and \"FactoMineR\" has been installed already.\n";
 			}
 		}
