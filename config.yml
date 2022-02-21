@@ -1,11 +1,11 @@
 sbx_demic:
-# TODO: if this is not set it should pick it up from sbx_coassembly
-  contigs_fasta: "~/assembly/coassembly/all_final_contigs.fa" #e.g. all.final.contigs.fasta
-# TODO: this binned_dir should be auto-set in the binning part of sbx_coassembly or just integrate it in sbx_demic
-  binned_dir: "~/assembly/coassembly/max_bin" #--fasta_dir
+  sunbeam_root: "~/sunbeam-stable/" # Be sure that this points to where sunbeam is installed
+  demic: "/extensions/sbx_demic/vendor_demic_v1.0.2/DEMIC.pl" # Path addendum to sbx_demic.sunbeam_root
+  contigs_fasta: "/assembly/coassembly/max_bin/all_final_contigs.fa" # Path addendum to all.output_fp
+  binned_dir: "/assembly/coassembly/max_bin" #--fasta_dir, Path addendum to all.output_fp
   threads: 4 #--thread_num
   keepall: FALSE #--output_all
-  extras: "" #other parameters passed to DEMIC.pl
+  extras: "" # Other parameters passed to DEMIC.pl
 
 #Full arguments of demic:
 #The arguments of DEMIC are as follows:
