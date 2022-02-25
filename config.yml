@@ -1,6 +1,6 @@
 sbx_demic:
-  sunbeam_root: "~/sunbeam-stable/" # Be sure that this points to where sunbeam is installed
-  demic: "/extensions/sbx_demic/vendor_demic_v1.0.2/DEMIC.pl" # Path addendum to sbx_demic.sunbeam_root
+  demic: "~/sunbeam-stable/extensions/sbx_demic/vendor_demic_v1.0.2/DEMIC.pl" # Make sure that this actually points to the script
+                                                                              # Just alter the path before sunbeam-stable to point to your sunbeam install
   contigs_fasta: "/assembly/coassembly/max_bin/all_final_contigs.fa" # Path addendum to all.output_fp
   binned_dir: "/assembly/coassembly/max_bin" #--fasta_dir, Path addendum to all.output_fp
   threads: 4 #--thread_num

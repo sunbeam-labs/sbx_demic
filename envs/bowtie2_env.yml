@@ -1,4 +1,5 @@
 channels:
     - bioconda
+    - conda-forge
 dependencies:
-    - bioconda::bowtie2=2.4.5
+    - bioconda::bowtie2

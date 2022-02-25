@@ -13,20 +13,21 @@ rule all_demic:
 
 rule maxbin:
     input:
-        str(Cfg['all']['output_fp']) + '/qc/decontam/'
+        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'),group=list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0]))),
+        b = rules.all_prep_paired.input
     output:
         str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta'])
     params:
-        basename = str(Cfg['all']['output_fp'])
-        binned_dir = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['binned_dir'])
-        contigs_fasta = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta'])
-    conda:
-        "envs/maxbin_env.yml"
+        basename = str(Cfg['all']['output_fp']),
+        binned_dir = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['binned_dir']),
+        contigs_fasta = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta']),
+    #conda:
+        #"envs/maxbin_env.yml"
     shell:
         "find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && "
         "mkdir -p {params.binned_dir} && "
-        "run_MaxBin.pl -thread 10 -contig {params.contigs_fasta} -out {params.binned_dir} -reads_list {params.basename}/decontam_list && "
-        "cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output}"
+        "cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output} && "
+        "run_MaxBin.pl -thread 10 -contig {params.contigs_fasta} -out {params.binned_dir} -reads_list {params.basename}/decontam_list"
 
 rule bowtie2_build:
     input:
@@ -102,15 +103,15 @@ rule run_demic:
     output:
         str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
     params:
-        demic = Cfg['sbx_demic']['demic']
+        demic = Cfg['sbx_demic']['demic'],
         sam_dir = str(MAPPING_FP/'demic'/'sorted'),
         fasta_dir = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['binned_dir']),
         keep_all = Cfg['sbx_demic']['keepall'],
-        extras = Cfg['sbx_demic']['extras']
+        extras = Cfg['sbx_demic']['extras'],
     threads:
         Cfg['sbx_demic']['threads']
-    conda:
-        "envs/demic_env.yml"
+    #conda:
+        #"envs/demic_env.yml"
     log:
         str(MAPPING_FP/'demic'/'logs'/'demic.error')
     shell:
