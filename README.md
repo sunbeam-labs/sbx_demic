@@ -6,7 +6,7 @@
 
 ## Installation
 
-0. Install sbx_coassembly from https://github.com/scottdaniel/sbx_coassembly
+0. Install sbx_coassembly from https://github.com/sunbeam-labs/sbx_coassembly
 1. git clone https://github.com/sunbeam-labs/sbx_demic
 2. cp sbx_demic $SUNBEAM_DIR/extensions/
 3. cat sunbeam/extensions/sbx_demic/config.yml >> sunbeam_config.yml (the config.yml that your are using for your given project)
