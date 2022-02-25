@@ -2,22 +2,23 @@
 
 [Sunbeam](https://github.com/sunbeam-labs/sunbeam) extension for [DEMIC](https://sourceforge.net/projects/demic/files/)
 
-**This is still in active development and may not work.** (e.g. currently you have to run binning of the metagenome manually and specifiy the output directory -- see `pre_run_demic.sh`). *caveat emptor*
-
 *Important* -- This was tested with modified demic scripts version 1.0.2, please check the sourceforge.net site for any updates. One change I made was to save a couple of R data files for "manual" analysis in Rstudio if one so desires. See the git history for any other changes.
 
 ## Installation
 
+0. Install sbx_coassembly from https://github.com/scottdaniel/sbx_coassembly
 1. git clone https://github.com/sunbeam-labs/sbx_demic
 2. cp sbx_demic $SUNBEAM_DIR/extensions/
 3. cat sunbeam/extensions/sbx_demic/config.yml >> sunbeam_config.yml (the config.yml that your are using for your given project)
-4. Edit sunbeam_config.yml to have desired parameters (important: contigs_fasta points to your pre-assembled metagenome)
-5. Copy demic scripts ([DEMIC.pl](/vendor_demic_v1.0.2/DEMIC.pl), [estGrowthRate1.0.2.R](/vendor_demic_v1.0.2/estGrowthRate1.0.2.R), and [testR1.0.2.R](/vendor_demic_v1.0.2/testR1.0.2.R)) to your local bin directory (e.g. $HOME/bin)
-6. If you do not have a metagenome fasta file ready, you can use [sbx_coassembly](https://github.com/scottdaniel/sbx_coassembly) to co-assemble your reads into binned metagenomes
+4. Edit sunbeam_config.yml to have desired parameters
+    - Make sure that
+    - *sbx_demic.demic* points to the DEMIC.pl script in the extension
+    - *all.paired_end* is true if you have paired end reads
+    - *mapping.genomes_fp* points to your reference fasta
 
 ## Running
 
-1. sunbeam all_demic --use-conda {rest of arguments for sunbeam}
+1. sunbeam all_demic --use-conda --configfile */path/to/config* {rest of arguments for sunbeam}
 
 ### Trouble-shooting
 
@@ -35,4 +36,4 @@
 
 # TODO:
 
-- Update sbx_coassembly to do the binning of the metagenome **OR** have sbx_demic do binning of the metagenom
+- Update sbx_coassembly to do the binning of the metagenome **OR** have sbx_demic do binning of the metagenome
