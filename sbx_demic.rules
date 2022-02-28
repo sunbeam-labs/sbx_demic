@@ -21,8 +21,8 @@ rule maxbin:
         basename = str(Cfg['all']['output_fp']),
         binned_dir = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['binned_dir']),
         contigs_fasta = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta']),
-    #conda:
-        #"envs/maxbin_env.yml"
+    conda:
+        "envs/maxbin_env.yml"
     shell:
         "find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && "
         "mkdir -p {params.binned_dir} && "
@@ -110,8 +110,8 @@ rule run_demic:
         extras = Cfg['sbx_demic']['extras'],
     threads:
         Cfg['sbx_demic']['threads']
-    #conda:
-        #"envs/demic_env.yml"
+    conda:
+        "envs/demic_env.yml"
     log:
         str(MAPPING_FP/'demic'/'logs'/'demic.error')
     shell:
