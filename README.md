@@ -22,7 +22,7 @@
 
 ### Trouble-shooting
 
-- If you have trouble running with "--use-conda" it may be best just to install the needed packages into the sunbeam environment (e.g. `conda activate sunbeam && conda install --file sbx_demic_env.yml`)
+- If you have trouble running with "--use-conda" it may be best just to install the needed packages into the sunbeam environment (e.g. `conda activate sunbeam && conda install --file sbx_demic_env.yml`) and then run sunbeam in two pieces (`sunbeam all_coassemble --use-conda --configfile /path/to/config {rest of arguments for sunbeam}` and then `sunbeam all_demic --configfile /path/to/config {rest of arguments for sunbeam}`)
 
 ## References
 
@@ -33,7 +33,3 @@
 - DEMIC publication: https://www.nature.com/articles/s41592-018-0182-0
 
 - isolated Conda environment: http://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#integrated-package-management
-
-# TODO:
-
-- Update sbx_coassembly to do the binning of the metagenome **OR** have sbx_demic do binning of the metagenome
