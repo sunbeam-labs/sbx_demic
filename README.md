@@ -12,17 +12,16 @@
 3. cat sunbeam/extensions/sbx_demic/config.yml >> sunbeam_config.yml (the config.yml that your are using for your given project)
 4. Edit sunbeam_config.yml to have desired parameters
     - Make sure that
-    - *sbx_demic.demic* points to the DEMIC.pl script in the extension
     - *all.paired_end* is true if you have paired end reads
     - *mapping.genomes_fp* points to your reference fasta
 
 ## Running
 
-1. sunbeam all_demic --use-conda --configfile */path/to/config* {rest of arguments for sunbeam}
+1. sunbeam run all_demic --use-conda --configfile */path/to/config* {rest of arguments for sunbeam}
 
 ### Trouble-shooting
 
-- If you have trouble running with "--use-conda" it may be best just to install the needed packages into the sunbeam environment (e.g. `conda activate sunbeam && conda install --file sbx_demic_env.yml`) and then run sunbeam in two pieces (`sunbeam all_coassemble --use-conda --configfile /path/to/config {rest of arguments for sunbeam}` and then `sunbeam all_demic --configfile /path/to/config {rest of arguments for sunbeam}`)
+- If you have trouble running with "--use-conda" it may be best just to install the needed packages into the sunbeam environment (e.g. `conda activate sunbeam && conda install --file sbx_demic_env.yml`) and then run sunbeam in two pieces (`sunbeam run all_coassemble --use-conda --configfile /path/to/config {rest of arguments for sunbeam}` and then `sunbeam run all_demic --configfile /path/to/config {rest of arguments for sunbeam}`)
 
 ## References
 

@@ -2,10 +2,17 @@
 
 from sunbeamlib import samtools
 import os
+import sys
 
 TARGET_DEMIC = [
     str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
 ]
+
+def get_demic_path() -> str:
+    for fp in sys.path:
+        if fp.split("/")[-1] == "sbx_demic":
+            return fp
+    raise Error("Filepath for demic not found, are you sure it's installed under extensions/sbx_demic?")
 
 rule all_demic:
     input:
@@ -16,11 +23,11 @@ rule maxbin:
         a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'),group=list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0]))),
         b = rules.all_prep_paired.input
     output:
-        str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta'])
+        str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['contigs_fasta']
     params:
         basename = str(Cfg['all']['output_fp']),
-        binned_dir = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['binned_dir']),
-        contigs_fasta = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta']),
+        binned_dir = str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['binned_dir'],
+        contigs_fasta = str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['contigs_fasta'],
     conda:
         "envs/maxbin_env.yml"
     shell:
@@ -31,13 +38,13 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta'])
+        str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['contigs_fasta']
     params:
-        basename = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta'])
+        basename = str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['contigs_fasta']
     threads:
         Cfg['sbx_demic']['threads']
     output:
-        touch(str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta']) + '.done')
+        touch(str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['contigs_fasta'] + '.1.bt2')
     conda:
         "envs/bowtie2_env.yml"
     shell:
@@ -56,7 +63,7 @@ rule bowtie2:
     threads:
         Cfg['sbx_demic']['threads']
     params:
-        db_basename = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['contigs_fasta'])
+        db_basename = str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['contigs_fasta']
     conda:
         "envs/bowtie2_env.yml"
     shell:
@@ -89,7 +96,7 @@ rule samtools_sort:
 # how to get the directory of this output:
 #        str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam')
 # and how to get the directory of:
-#       str(Cfg['sbx_demic']['contigs_fasta'])
+#       Cfg['sbx_demic']['contigs_fasta']
 # because those are the inputs of the next rule
 #
 # Maybe this will work:
@@ -103,9 +110,9 @@ rule run_demic:
     output:
         str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
     params:
-        demic = Cfg['sbx_demic']['demic'],
+        demic = get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
         sam_dir = str(MAPPING_FP/'demic'/'sorted'),
-        fasta_dir = str(Cfg['all']['output_fp']) + str(Cfg['sbx_demic']['binned_dir']),
+        fasta_dir = str(Cfg['all']['output_fp']) + Cfg['sbx_demic']['binned_dir'],
         keep_all = Cfg['sbx_demic']['keepall'],
         extras = Cfg['sbx_demic']['extras'],
     threads:
