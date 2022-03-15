@@ -126,6 +126,6 @@ TEST4,{r4r1},{r4r2}\n
         # Check output
         self.assertTrue(os.path.exists(self.all_ptr_fp))
         with open(self.all_ptr_fp) as f:
-            self.assertEqual(next(f), "\tTEST0\tTEST1\tTEST2\tTEST3\tTEST4")
+            self.assertEqual(next(f), "\tTEST0\tTEST1\tTEST2\tTEST3\tTEST4\n")
             for val in next(f).split("\t")[1:]:
                 self.assertEqual(int(val), 3)
