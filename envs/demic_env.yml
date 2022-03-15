@@ -1,6 +1,7 @@
 channels:
     - conda-forge
 dependencies:
-    - conda-forge::r-lme4=1.1_27.1
-    - conda-forge::r-factominer=2.4
-    - conda-forge::r-reshape2=1.4.4
+    - r-base=4.1
+    - r-lme4
+    - r-factominer
+    - r-reshape2

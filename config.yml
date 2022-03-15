@@ -1,6 +1,4 @@
 sbx_demic:
-  contigs_fasta: "/assembly/coassembly/max_bin/all_final_contigs.fa" # Path addendum to all.output_fp
-  binned_dir: "/assembly/coassembly/max_bin" #--fasta_dir, Path addendum to all.output_fp
   threads: 4 #--thread_num
   keepall: FALSE #--output_all
   extras: "" # Other parameters passed to DEMIC.pl
