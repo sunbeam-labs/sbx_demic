@@ -103,7 +103,7 @@ TEST4,{r4r1},{r4r2}\n
             f.write(self.config_content)
 
         self.output_fp = os.path.join(self.temp_dir, "sunbeam_output")
-        shutil.copytree(".tests/data/sunbeam_output", self.output_fp)
+        #shutil.copytree(".tests/data/sunbeam_output", self.output_fp)
 
         self.all_ptr_fp = os.path.join(self.output_fp, "mapping/demic/DEMIC_OUT/all_PTR.txt")
     

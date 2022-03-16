@@ -14,10 +14,11 @@
     - Make sure that
     - *all.paired_end* is true if you have paired end reads
     - *mapping.genomes_fp* points to your reference fasta
+    - *sbx_demic.extras* has any parameters you want to pass to DEMIC.pl
 
 ## Running
 
-1. sunbeam run all_demic --use-conda --configfile */path/to/config* {rest of arguments for sunbeam}
+1. sunbeam run all_demic --use-conda --configfile */path/to/config* {rest of arguments for sunbeam} -- {arguments for snakemake}
 
 ### Trouble-shooting
 
