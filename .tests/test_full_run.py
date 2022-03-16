@@ -9,14 +9,16 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-def find_miniconda() -> str:
+def find_conda() -> str:
     for fp in sys.path:
-        if "miniconda" in fp:
+        if "miniconda" in fp or "anaconda" in fp:
             conda_fp = ""
             for s in fp.split("/"):
                 conda_fp = conda_fp + s + "/"
-                if "miniconda" in s:
+                if "miniconda" in s or "anaconda" in s:
+                    print("Found conda installation at " + conda_fp)
                     return conda_fp
+    print("WARNING: Couldn't find path to NexteraPE adapter")
 
 class FullRunTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -107,7 +109,7 @@ TEST4,{r4r1},{r4r2}\n
               keepall: FALSE #--output_all\n
               extras: "-W 701 -D 50 -L 31" # Other parameters passed to DEMIC.pl\n
             """.format(root = os.path.join(self.temp_dir),
-                adapt = os.path.join(find_miniconda(), "envs/sunbeam/share/trimmomatic/adapters/NexteraPE-PE.fa"))
+                adapt = os.path.join(find_conda(), "envs/sunbeam/share/trimmomatic/adapters/NexteraPE-PE.fa"))
         with open(self.config_fp, "w") as f:
             f.write(self.config_content)
 
