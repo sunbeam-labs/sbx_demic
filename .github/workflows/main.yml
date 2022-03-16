@@ -48,9 +48,10 @@ jobs:
           git clone -b stable https://github.com/eclarke/sunbeam sunbeam-stable
           cd sunbeam-stable
           bash install.sh
+          git clone https://github.com/sunbeam-labs/sbx_coassembly/ extensions/sbx_coassembly
+          git clone https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
 
       - name: Run Tests
         run: |
-          conda init bash
-          conda activate sunbeam
+          source activate sunbeam
           pytest .tests/
