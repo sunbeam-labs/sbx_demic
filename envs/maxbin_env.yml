@@ -1,5 +1,5 @@
 channels:
-    - bioconda
-    #- conda-forge
+    #- bioconda
+    - conda-forge
 dependencies:
     - maxbin2

@@ -13,7 +13,6 @@
 4. Edit sunbeam_config.yml to have desired parameters
     - Make sure that
     - *all.paired_end* is true if you have paired end reads
-    - *mapping.genomes_fp* points to your reference fasta
     - *sbx_demic.extras* has any parameters you want to pass to DEMIC.pl
 
 ## Running

@@ -81,7 +81,7 @@ TEST4,{r4r1},{r4r2}\n
               root_fp: ''\n
             mapping:\n
               suffix: mapping\n
-              genomes_fp: {ref}\n
+              genomes_fp: ''\n
               samtools_opts: ''\n
               threads: 4\n
             download:\n
@@ -97,8 +97,7 @@ TEST4,{r4r1},{r4r2}\n
               threads: 4 #--thread_num\n
               keepall: FALSE #--output_all\n
               extras: "-W 701 -D 50 -L 31" # Other parameters passed to DEMIC.pl\n
-            """.format(root = os.path.join(self.temp_dir),
-                ref = os.path.join(self.data_fp, "reference/akk-genome.fasta"))
+            """.format(root = self.temp_dir)
         with open(self.config_fp, "w") as f:
             f.write(self.config_content)
 
