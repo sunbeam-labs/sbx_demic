@@ -2,4 +2,4 @@ channels:
     #- bioconda
     - conda-forge
 dependencies:
-    - maxbin2=2.2.7
+    - maxbin2>=2
