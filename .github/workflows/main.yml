@@ -51,6 +51,5 @@ jobs:
 
       - name: Run Tests
         run: |
-          conda init bash
-          conda activate sunbeam
+          source activate sunbeam
           pytest .tests/
