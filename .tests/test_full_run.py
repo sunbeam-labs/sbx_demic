@@ -9,6 +9,15 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+def find_miniconda() -> str:
+    for fp in sys.path:
+        if "miniconda" in fp:
+            conda_fp = ""
+            for s in fp.split("/"):
+                conda_fp = conda_fp + s + "/"
+                if "miniconda" in s:
+                    return conda_fp
+
 class FullRunTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.mkdtemp()
@@ -54,7 +63,7 @@ TEST4,{r4r1},{r4r2}\n
               trailing: 3\n
               slidingwindow: [4, 15]\n
               minlen: 36\n
-              adapter_fp: ''\n
+              adapter_fp: {adapt}\n
               fwd_adapters: [GTTTCCCAGTCACGATC, GTTTCCCAGTCACGATCNNNNNNNNNGTTTCCCAGTCACGATC]\n
               rev_adapters: [GTTTCCCAGTCACGATC, GTTTCCCAGTCACGATCNNNNNNNNNGTTTCCCAGTCACGATC]\n
               kz_threshold: 0.55\n
@@ -98,6 +107,7 @@ TEST4,{r4r1},{r4r2}\n
               keepall: FALSE #--output_all\n
               extras: "-W 701 -D 50 -L 31" # Other parameters passed to DEMIC.pl\n
             """.format(root = os.path.join(self.temp_dir),
+                adapt = os.path.join(find_miniconda(), "envs/sunbeam/share/trimmomatic/adapters/NexteraPE-PE.fa"),
                 ref = os.path.join(self.data_fp, "reference/akk-genome.fasta"))
         with open(self.config_fp, "w") as f:
             f.write(self.config_content)
