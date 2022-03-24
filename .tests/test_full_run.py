@@ -29,11 +29,11 @@ class FullRunTests(unittest.TestCase):
 
         self.samples_fp = os.path.join(self.temp_dir, "samples.csv")
         self.samples_content = """
-TEST0,{r0r1},{r0r2}\n
 TEST1,{r1r1},{r1r2}\n
 TEST2,{r2r1},{r2r2}\n
 TEST3,{r3r1},{r3r2}\n
 TEST4,{r4r1},{r4r2}\n
+TEST0,{r0r1},{r0r2}\n
 """.format(
                 r0r1 = os.path.join(self.data_fp, "reads/TEST0_R1.fastq.gz"),
                 r0r2 = os.path.join(self.data_fp, "reads/TEST0_R2.fastq.gz"),

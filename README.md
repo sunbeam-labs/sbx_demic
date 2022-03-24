@@ -21,7 +21,7 @@
 
 ### Trouble-shooting
 
-- If you have trouble running with "--use-conda" it may be best just to install the needed packages into the sunbeam environment (e.g. `conda activate sunbeam && conda install --file sbx_demic_env.yml`) and then run sunbeam in two pieces (`sunbeam run all_coassemble --use-conda --configfile /path/to/config {rest of arguments for sunbeam}` and then `sunbeam run all_demic --configfile /path/to/config {rest of arguments for sunbeam}`)
+- If you have trouble running with "--use-conda" it may be best just to install the needed packages into the sunbeam environment (e.g. `conda activate sunbeam && conda install --file sbx_demic_env.yml`) and then run sunbeam in two pieces (`sunbeam run all_coassemble --use-conda --configfile /path/to/config {rest of arguments for sunbeam}` and then `sunbeam run all_demic --configfile /path/to/config {rest of arguments for sunbeam}`). Please also create a new issue on GitHub detailing the error.
 
 ## References
 
