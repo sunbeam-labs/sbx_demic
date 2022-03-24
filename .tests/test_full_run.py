@@ -139,4 +139,4 @@ TEST0,{r0r1},{r0r2}\n
         with open(self.all_ptr_fp) as f:
             self.assertEqual(next(f), "\tTEST0\tTEST1\tTEST2\tTEST3\tTEST4\n")
             for val in next(f).split("\t")[1:]:
-                self.assertEqual(int(val), 3)
+                self.assertEqual(int(float(val)), 3)
