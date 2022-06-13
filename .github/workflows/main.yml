@@ -41,15 +41,15 @@ jobs:
           conda-channels: '' # optional, default is 
       
       - name: Install Dependencies
-          #python -m pip install snakemake
-          #conda install -c conda-forge mamba
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
           python -m pip install -U pytest
           git clone -b stable https://github.com/eclarke/sunbeam sunbeam-stable
           cd sunbeam-stable
           bash install.sh
           git clone https://github.com/sunbeam-labs/sbx_coassembly/ extensions/sbx_coassembly
-          git clone https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
+          git clone -b $BRANCH_NAME https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
 
       - name: Run Tests
         run: |

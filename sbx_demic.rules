@@ -127,7 +127,6 @@ rule run_demic:
     # Rscript {params.r_installer} && \
     shell:
         """
-        
         {params.demic} --output_all {params.keep_all} {params.extras} \
         --thread_num {threads} \
         -S {params.sam_dir} -F {params.fasta_dir} \
