@@ -49,6 +49,7 @@ jobs:
           cd sunbeam
           bash install.sh -v
           git clone https://github.com/sunbeam-labs/sbx_coassembly/ extensions/sbx_coassembly
+          echo $BRANCH_NAME
           git clone -b $BRANCH_NAME https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
 
       - name: Run Tests
