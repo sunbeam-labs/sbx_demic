@@ -47,7 +47,7 @@ jobs:
           python -m pip install -U pytest
           git clone https://github.com/eclarke/sunbeam sunbeam
           cd sunbeam
-          bash install.sh
+          bash install.sh -v
           git clone https://github.com/sunbeam-labs/sbx_coassembly/ extensions/sbx_coassembly
           git clone -b $BRANCH_NAME https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
 
