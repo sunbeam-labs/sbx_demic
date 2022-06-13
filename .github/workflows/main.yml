@@ -45,8 +45,8 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref }}
         run: |
           python -m pip install -U pytest
-          git clone -b stable https://github.com/eclarke/sunbeam sunbeam-stable
-          cd sunbeam-stable
+          git clone https://github.com/eclarke/sunbeam sunbeam
+          cd sunbeam
           bash install.sh
           git clone https://github.com/sunbeam-labs/sbx_coassembly/ extensions/sbx_coassembly
           git clone -b $BRANCH_NAME https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
