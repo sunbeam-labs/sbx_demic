@@ -54,14 +54,14 @@ rule bowtie2_build:
 
 # Run bowtie2 with index
 rule bowtie2:
-    output:
-        str(MAPPING_FP/'demic'/'raw'/'{sample}.sam')
     input:
         rules.bowtie2_build.output,
         reads = expand(
             str(QC_FP/'decontam'/'{sample}_{rp}.fastq.gz'),
             sample = Samples.keys(),
             rp = Pairs)
+    output:
+        str(MAPPING_FP/'demic'/'raw'/'{sample}.sam')
     threads:
         Cfg['sbx_demic']['threads']
     params:

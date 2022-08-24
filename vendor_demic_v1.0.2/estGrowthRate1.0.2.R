@@ -278,7 +278,7 @@ if(length(args)==1){
 }
 
 # Load matrix of .cov3 and rename the heads
-X <- read.csv(args[1], header=FALSE)
+X <- read.csv(args[1], header=FALSE, stringsAsFactors=TRUE)
 
 colnames(X) <- c("logCov", "GC", "sample", "contig", "length")
 
