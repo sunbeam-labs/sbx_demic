@@ -31,7 +31,7 @@ rule maxbin:
         binned_dir = str(Cfg['all']['output_fp']) + BINNED_DIR,
         contigs_fasta = str(Cfg['all']['output_fp']) + CONTIGS_FASTA,
     conda:
-        "envs/maxbin_env.yml"
+        "demic_env.yml"
     shell:
         "find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && "
         "mkdir -p {params.binned_dir} && "
@@ -48,7 +48,7 @@ rule bowtie2_build:
     output:
         touch(str(Cfg['all']['output_fp']) + CONTIGS_FASTA + '.1.bt2')
     conda:
-        "envs/bowtie2_env.yml"
+        "demic_env.yml"
     shell:
         "bowtie2-build --threads {threads} {input} {params.basename}"
 
@@ -67,7 +67,7 @@ rule bowtie2:
     params:
         db_basename = str(Cfg['all']['output_fp']) + CONTIGS_FASTA
     conda:
-        "envs/bowtie2_env.yml"
+        "demic_env.yml"
     shell:
         """
         bowtie2 -q -x {params.db_basename} \
@@ -84,7 +84,7 @@ rule samtools_sort:
     threads:
         Cfg['sbx_demic']['threads']
     conda:
-        "envs/samtools_env.yml"
+        "demic_env.yml"
     log:
         str(MAPPING_FP/'demic'/'logs'/'samtools_{sample}.error')
     shell:
@@ -121,7 +121,7 @@ rule run_demic:
     threads:
         Cfg['sbx_demic']['threads']
     conda:
-        "envs/demic_env.yml"
+        "demic_env.yml"
     log:
         str(MAPPING_FP/'demic'/'logs'/'demic.error')
     # Rscript {params.r_installer} && \
