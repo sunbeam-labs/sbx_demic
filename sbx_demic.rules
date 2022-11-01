@@ -22,7 +22,7 @@ rule all_demic:
 
 rule maxbin:
     input:
-        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'),group=list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0]))),
+        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'), group=list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'], Samples.keys())[0]))),
         b = rules.all_prep_paired.input
     output:
         str(Cfg['all']['output_fp']) + CONTIGS_FASTA
