@@ -24,7 +24,7 @@ class FullRunTests(unittest.TestCase):
         self.config_fp = os.path.join(self.project_dir, "sunbeam_config.yml")
 
         self.output_fp = os.path.join(self.project_dir, "sunbeam_output")
-        #shutil.copytree(".tests/data/sunbeam_output", self.output_fp)
+        shutil.copytree(".tests/data/sunbeam_output", self.output_fp)
 
         self.all_ptr_fp = os.path.join(self.output_fp, "mapping/demic/DEMIC_OUT/all_PTR.txt")
     
