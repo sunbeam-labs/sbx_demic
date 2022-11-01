@@ -5,7 +5,7 @@ import os
 import sys
 
 TARGET_DEMIC = [
-    str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
+    MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt'
 ]
 BINNED_DIR = str(ASSEMBLY_FP/'coassembly'/'max_bin')
 CONTIGS_FASTA = BINNED_DIR + '/all_final_contigs.fa'
@@ -25,14 +25,15 @@ rule maxbin:
         a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'),group=list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0]))),
         b = rules.all_prep_paired.input
     output:
-        str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        CONTIGS_FASTA
     params:
         basename = str(Cfg['all']['output_fp']),
-        binned_dir = str(Cfg['all']['output_fp']) + BINNED_DIR,
-        contigs_fasta = str(Cfg['all']['output_fp']) + CONTIGS_FASTA,
+        binned_dir = BINNED_DIR,
+        contigs_fasta = CONTIGS_FASTA,
     conda:
         "envs/maxbin_env.yml"
     shell:
+        "echo {params.binned_dir} && "
         "find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && "
         "mkdir -p {params.binned_dir} && "
         "cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output} && "
@@ -40,13 +41,13 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        CONTIGS_FASTA
     params:
-        basename = str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        basename = CONTIGS_FASTA
     threads:
         Cfg['sbx_demic']['threads']
     output:
-        touch(str(Cfg['all']['output_fp']) + CONTIGS_FASTA + '.1.bt2')
+        touch(CONTIGS_FASTA + '.1.bt2')
     conda:
         "envs/bowtie2_env.yml"
     shell:
@@ -65,7 +66,7 @@ rule bowtie2:
     threads:
         Cfg['sbx_demic']['threads']
     params:
-        db_basename = str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        db_basename = CONTIGS_FASTA
     conda:
         "envs/bowtie2_env.yml"
     shell:
@@ -108,14 +109,15 @@ rule samtools_sort:
 rule run_demic:
     input:
         expand(str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam'),
-        sample = Samples.keys())
+        sample = Samples.keys()),
+        #CONTIGS_FASTA
     output:
         str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
     params:
         r_installer = get_demic_path() + "/envs/install.R",
         demic = get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
         sam_dir = str(MAPPING_FP/'demic'/'sorted'),
-        fasta_dir = str(Cfg['all']['output_fp']) + BINNED_DIR,
+        fasta_dir = BINNED_DIR,
         keep_all = Cfg['sbx_demic']['keepall'],
         extras = Cfg['sbx_demic']['extras'],
     threads:
