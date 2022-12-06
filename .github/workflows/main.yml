@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
   schedule:
@@ -15,16 +13,17 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Lint Code Base
-        uses: github/super-linter@v3.17.0
+        uses: github/super-linter@v4
         env:
           VALIDATE_ALL_CODEBASE: true
-          DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
           VALIDATE_SNAKEMAKE_SNAKEFMT: true
+          VALIDATE_PYTHON_BLACK: true
+          VALIDATE_PERL_PERLCRITIC: true
   
   test-snakemake:
     name: Test Extension
@@ -32,7 +31,7 @@ jobs:
     
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: setup-conda
         # You may pin to the exact commit or the version.
