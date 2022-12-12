@@ -6,40 +6,20 @@ on:
   schedule:
     - cron: "0 13 * * 1"
 
-jobs:
-  test-snakemake:
-    name: Test Extension
+jobs:  
+  test-e2e:
+    name: Test Extension with Sunbeam
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: setup-conda
-        # You may pin to the exact commit or the version.
-        # uses: s-weigand/setup-conda@945fd9e7c92f1efb12634ba552ee0b2ec140a5fd
-        uses: s-weigand/setup-conda@v1.1.0
+        uses: actions/checkout@v2
+        
+      - name: Test with Sunbeam
+        uses: actions/sbx_test_action@v0
         with:
-          # Additional channels like 'conda-forge' which can be used to install packages
-          conda-channels: '' # optional, default is 
-      
-      - name: Install Dependencies
-        env:
-          BRANCH_NAME: ${{ github.head_ref }}
-        run: |
-          python -m pip install -U pytest
-          git clone https://github.com/sunbeam-labs/sunbeam sunbeam
-          cd sunbeam
-          bash install.sh -v -e sunbeam
-          git clone https://github.com/sunbeam-labs/sbx_coassembly/ extensions/sbx_coassembly
-          if [ -z "${BRANCH_NAME}" ]
-          then
-            git clone https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
-          else
-            git clone -b $BRANCH_NAME https://github.com/Ulthran/sbx_demic/ extensions/sbx_demic
-          fi
-
-      - name: Run Tests
-        run: |
-          source activate sunbeam
-          pytest .tests/
+          sunbeam-version: 'dev'
+          extension-name: 'Ulthran/sbx_demic'
+          extension-branch-name: ${{ github.head_ref }}
+          other-extensions: 'sunbeam-labs/sbx_coassembly'
+          test-directory: '.tests'
