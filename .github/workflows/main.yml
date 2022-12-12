@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Test with Sunbeam
-        uses: sunbeam-labs/sbx_test_action@v0.0.0
+        uses: sunbeam-labs/sbx_test_action@v0
         with:
           sunbeam-version: 'stable'
           extension-name: 'Ulthran/sbx_demic'
