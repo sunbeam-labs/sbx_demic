@@ -10,7 +10,7 @@ jobs:
   test-e2e:
     name: Test Extension with Sunbeam
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
