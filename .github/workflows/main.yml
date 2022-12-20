@@ -18,8 +18,7 @@ jobs:
       - name: Test with Sunbeam
         uses: sunbeam-labs/sbx_test_action@v0
         with:
-          sunbeam-version: 'stable'
+          sunbeam-version: 'dev'
           extension-name: 'Ulthran/sbx_demic'
           extension-branch-name: ${{ github.head_ref }}
           other-extensions: 'sunbeam-labs/sbx_coassembly'
-          test-directory: '.tests/e2e/'
