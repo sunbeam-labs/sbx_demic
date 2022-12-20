@@ -56,9 +56,7 @@ def run_sunbeam(setup):
 
     output_fp = os.path.join(project_dir, "sunbeam_output")
 
-    all_ptr_fp = os.path.join(
-        output_fp, "mapping/demic/DEMIC_OUT/all_PTR.txt"
-    )
+    all_ptr_fp = os.path.join(output_fp, "mapping/demic/DEMIC_OUT/all_PTR.txt")
 
     benchmarks_fp = os.path.join(project_dir, "stats/")
 

@@ -41,7 +41,7 @@ rule maxbin:
     benchmark:
         BENCHMARK_FP / "maxbin.tsv"
     log:
-        LOG_FP / "maxbin.log"
+        LOG_FP / "maxbin.log",
     params:
         basename=str(Cfg["all"]["output_fp"]),
         binned_dir=str(Cfg["all"]["output_fp"]) + BINNED_DIR,
@@ -65,7 +65,7 @@ rule bowtie2_build:
     benchmark:
         BENCHMARK_FP / "bowtie2_build.tsv"
     log:
-        LOG_FP / "bowtie2-build.log"
+        LOG_FP / "bowtie2-build.log",
     params:
         basename=str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA,
     threads: 4
@@ -89,7 +89,7 @@ rule bowtie2:
     benchmark:
         BENCHMARK_FP / "bowtie2_{sample}.tsv"
     log:
-        LOG_FP / "bowtie2_{sample}.log"
+        LOG_FP / "bowtie2_{sample}.log",
     params:
         db_basename=str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA,
     threads: 4
@@ -136,7 +136,7 @@ rule run_demic:
     benchmark:
         BENCHMARK_FP / "run_demic.tsv"
     log:
-        LOG_FP / "run_demic.log"
+        LOG_FP / "run_demic.log",
     params:
         r_installer=get_demic_path() + "/envs/install.R",
         demic=get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
