@@ -10,9 +10,9 @@ CONTIGS_FASTA = BINNED_DIR + "/all_final_contigs.fa"
 
 
 def get_demic_path() -> str:
-    for fp in sys.path:
-        if fp.split("/")[-1] == "sbx_demic":
-            return fp
+    demic_path = os.path.join(sunbeam_dir, "extensions/sbx_demic/")
+    if os.path.exists(demic_path):
+        return demic_path
     raise Error(
         "Filepath for demic not found, are you sure it's installed under extensions/sbx_demic?"
     )
