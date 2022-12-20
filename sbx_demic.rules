@@ -50,9 +50,9 @@ rule maxbin:
         "demic_env.yml"
     shell:
         """
-        find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && /
-        mkdir -p {params.binned_dir} && /
-        cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output} && /
+        find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && \
+        mkdir -p {params.binned_dir} && \
+        cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output} && \
         run_MaxBin.pl -thread 10 -contig {params.contigs_fasta} -out {params.binned_dir} -reads_list {params.basename}/decontam_list -verbose 2>&1 | tee {log}
         """
 
