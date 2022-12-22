@@ -63,6 +63,7 @@ def run_sunbeam(setup):
     yield all_ptr_fp, benchmarks_fp
 
     shutil.copytree(os.path.join(output_fp, "logs/"), "logs/")
+    shutil.copytree(os.path.join(project_dir, "stats/"), "stats/")
 
 
 def test_full_run(run_sunbeam):

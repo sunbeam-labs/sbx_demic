@@ -2,7 +2,7 @@ name: Tests
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
   schedule:
     - cron: "0 13 * * 1"
 
@@ -24,4 +24,11 @@ jobs:
           other-extensions: 'sunbeam-labs/sbx_coassembly'
 
       - name: Dump Logs
-        run: cat logs/*.log
+        shell: bash
+        if: always()
+        run: tail -n +1 logs/*
+      
+      - name: Dump Stats
+        shell: bash
+        if: always()
+        run: cat stats/*

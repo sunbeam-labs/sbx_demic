@@ -9,6 +9,16 @@ BINNED_DIR = str(ASSEMBLY_FP / "coassembly" / "max_bin")
 CONTIGS_FASTA = BINNED_DIR + "/all_final_contigs.fa"
 
 
+try:
+    BENCHMARK_FP
+except NameError:
+    BENCHMARK_FP = output_subdir(Cfg, "benchmarks")
+try:
+    LOG_FP
+except NameError:
+    LOG_FP = output_subdir(Cfg, "logs")
+
+
 def get_demic_path() -> str:
     demic_path = os.path.join(sunbeam_dir, "extensions/sbx_demic/")
     if os.path.exists(demic_path):
