@@ -41,29 +41,31 @@ def setup():
 def run_sunbeam(setup):
     temp_dir, project_dir = setup
 
-    # Run the test job.
-    sp.check_output(
-        [
-            "sunbeam",
-            "run",
-            "--profile",
-            project_dir,
-            "all_demic",
-            "--directory",
-            temp_dir,
-        ]
-    )
-
     output_fp = os.path.join(project_dir, "sunbeam_output")
+
+    try:
+        # Run the test job
+        sp.check_output(
+            [
+                "sunbeam",
+                "run",
+                "--profile",
+                project_dir,
+                "all_demic",
+                "--directory",
+                temp_dir,
+            ]
+        )
+    except sp.CalledProcessError as e:
+        shutil.copytree(os.path.join(output_fp, "logs/"), "logs/")
+        shutil.copytree(os.path.join(project_dir, "stats/"), "stats/")
+        sp.CalledProcessError(e)
 
     all_ptr_fp = os.path.join(output_fp, "mapping/demic/DEMIC_OUT/all_PTR.txt")
 
     benchmarks_fp = os.path.join(project_dir, "stats/")
 
     yield all_ptr_fp, benchmarks_fp
-
-    shutil.copytree(os.path.join(output_fp, "logs/"), "logs/")
-    shutil.copytree(os.path.join(project_dir, "stats/"), "stats/")
 
 
 def test_full_run(run_sunbeam):
