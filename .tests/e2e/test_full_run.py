@@ -60,6 +60,9 @@ def run_sunbeam(setup):
         shutil.copytree(os.path.join(output_fp, "logs/"), "logs/")
         shutil.copytree(os.path.join(project_dir, "stats/"), "stats/")
         sp.CalledProcessError(e)
+    
+    shutil.copytree(os.path.join(output_fp, "logs/"), "logs/")
+    shutil.copytree(os.path.join(project_dir, "stats/"), "stats/")
 
     all_ptr_fp = os.path.join(output_fp, "mapping/demic/DEMIC_OUT/all_PTR.txt")
 
