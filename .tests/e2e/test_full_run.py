@@ -75,15 +75,3 @@ def test_full_run(run_sunbeam):
         assert next(f) == "\tTEST0\tTEST1\tTEST2\tTEST3\tTEST4\n"
         for val in next(f).split("\t")[1:]:
             assert round(float(val)) == 3
-
-
-def test_benchmarks(run_sunbeam):
-    all_ptr_fp, benchmarks_fp = run_sunbeam
-
-    filename = os.listdir(benchmarks_fp)[0]
-    with open(os.path.join(benchmarks_fp, filename)) as f:
-        rd = csv.DictReader(f, delimiter="\t")
-        for r in rd:
-            assert (
-                float(r["cpu_time"]) < 0.5
-            ), f"cpu_time for {r['rule']} is higher than 0.5: {r['cpu_time']}"
