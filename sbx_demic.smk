@@ -1,0 +1,166 @@
+# -*- mode: Snakemake -*-
+
+from sunbeamlib import samtools
+import os
+import sys
+
+TARGET_DEMIC = [str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt")]
+BINNED_DIR = str(ASSEMBLY_FP / "coassembly" / "max_bin")
+CONTIGS_FASTA = BINNED_DIR + "/all_final_contigs.fa"
+
+
+try:
+    BENCHMARK_FP
+except NameError:
+    BENCHMARK_FP = output_subdir(Cfg, "benchmarks")
+try:
+    LOG_FP
+except NameError:
+    LOG_FP = output_subdir(Cfg, "logs")
+
+
+def get_demic_path() -> str:
+    demic_path = os.path.join(sunbeam_dir, "extensions/sbx_demic/")
+    if os.path.exists(demic_path):
+        return demic_path
+    raise Error(
+        "Filepath for demic not found, are you sure it's installed under extensions/sbx_demic?"
+    )
+
+
+rule all_demic:
+    input:
+        TARGET_DEMIC,
+
+
+rule maxbin:
+    input:
+        a=expand(
+            str(ASSEMBLY_FP / "coassembly" / "{group}_final_contigs.fa"),
+            group=list(
+                set(
+                    coassembly_groups(
+                        Cfg["sbx_coassembly"]["group_file"], Samples.keys()
+                    )[0]
+                )
+            ),
+        ),
+        b=rules.all_prep_paired.input,
+    output:
+        str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA,
+    benchmark:
+        BENCHMARK_FP / "maxbin.tsv"
+    log:
+        LOG_FP / "maxbin.log",
+    params:
+        basename=str(Cfg["all"]["output_fp"]),
+        binned_dir=str(Cfg["all"]["output_fp"]) + BINNED_DIR,
+        contigs_fasta=str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA,
+    conda:
+        "demic_env.yml"
+    shell:
+        """
+        find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && \
+        mkdir -p {params.binned_dir} && \
+        cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output} && \
+        run_MaxBin.pl -thread 10 -contig {params.contigs_fasta} -out {params.binned_dir} -reads_list {params.basename}/decontam_list -verbose 2>&1 | tee {log}
+        """
+
+
+rule bowtie2_build:
+    input:
+        str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA,
+    output:
+        touch(str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA + ".1.bt2"),
+    benchmark:
+        BENCHMARK_FP / "bowtie2_build.tsv"
+    log:
+        LOG_FP / "bowtie2-build.log",
+    params:
+        basename=str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA,
+    threads: 4
+    conda:
+        "demic_env.yml"
+    shell:
+        "bowtie2-build --threads {threads} {input} {params.basename} 2>&1 | tee {log}"
+
+
+# Run bowtie2 with index
+rule bowtie2:
+    input:
+        rules.bowtie2_build.output,
+        reads=expand(
+            str(QC_FP / "decontam" / "{sample}_{rp}.fastq.gz"),
+            sample=Samples.keys(),
+            rp=Pairs,
+        ),
+    output:
+        str(MAPPING_FP / "demic" / "raw" / "{sample}.sam"),
+    benchmark:
+        BENCHMARK_FP / "bowtie2_{sample}.tsv"
+    log:
+        LOG_FP / "bowtie2_{sample}.log",
+    params:
+        db_basename=str(Cfg["all"]["output_fp"]) + CONTIGS_FASTA,
+    threads: 4
+    conda:
+        "demic_env.yml"
+    shell:
+        """
+        bowtie2 -q -x {params.db_basename} \
+        -1 {input.reads[0]} -2 {input.reads[1]} -p {threads} \
+        -S {output} \
+        2>&1 | tee {log}
+        """
+
+
+rule samtools_sort:
+    input:
+        str(MAPPING_FP / "demic" / "raw" / "{sample}.sam"),
+    output:
+        temp_files=temp(str(MAPPING_FP / "demic" / "sorted" / "{sample}.bam")),
+        sorted_files=str(MAPPING_FP / "demic" / "sorted" / "{sample}.sam"),
+    log:
+        str(MAPPING_FP / "demic" / "logs" / "samtools_{sample}.error"),
+    benchmark:
+        BENCHMARK_FP / "samtools_sort_{sample}.tsv"
+    threads: 4
+    conda:
+        "demic_env.yml"
+    shell:
+        """
+        echo "converting to bam, sorting, and converting back to sam"
+        samtools view -@ {threads} -bS {input} | samtools sort -@ {threads} - -o {output.temp_files} 2> {log}
+        samtools view -@ {threads} -h {output.temp_files} > {output.sorted_files} 2>> {log}
+        """
+
+
+rule run_demic:
+    input:
+        expand(
+            str(MAPPING_FP / "demic" / "sorted" / "{sample}.sam"),
+            sample=Samples.keys(),
+        ),
+    output:
+        str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"),
+    benchmark:
+        BENCHMARK_FP / "run_demic.tsv"
+    log:
+        LOG_FP / "run_demic.log",
+    params:
+        r_installer=get_demic_path() + "/envs/install.R",
+        demic=get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
+        sam_dir=str(MAPPING_FP / "demic" / "sorted"),
+        fasta_dir=str(Cfg["all"]["output_fp"]) + BINNED_DIR,
+        keep_all=Cfg["sbx_demic"]["keepall"],
+        extras=Cfg["sbx_demic"]["extras"],
+    threads: 4
+    conda:
+        "demic_env.yml"
+    shell:
+        """
+        {params.demic} --output_all {params.keep_all} {params.extras} \
+        --thread_num {threads} \
+        -S {params.sam_dir} -F {params.fasta_dir} \
+        -O $(dirname {output}) 2>&1 {log}
+        """

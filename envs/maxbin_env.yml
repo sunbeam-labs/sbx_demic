@@ -1,6 +1,0 @@
-channels:
-    - bioconda
-    - conda-forge
-dependencies:
-    - maxbin2
-    - conda-forge::tbb=2020.2

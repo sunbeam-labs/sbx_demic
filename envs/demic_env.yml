@@ -1,7 +1,0 @@
-channels:
-    - conda-forge
-dependencies:
-    - r-base=4.1
-    - r-lme4
-    - r-factominer
-    - r-reshape2
