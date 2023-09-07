@@ -1,0 +1,7 @@
+name: demic_bio_env
+channels:
+  - bioconda
+dependencies:
+  - bowtie2
+  - maxbin2=2.2.7
+  - samtools

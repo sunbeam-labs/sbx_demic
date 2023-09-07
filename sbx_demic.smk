@@ -96,7 +96,7 @@ rule prep_samples_for_concatenation_paired_demic:
         LOG_FP / "prep_samples_for_concatenation_paired_demic_{sample}_{group}.log",
     threads: Cfg["coassembly_demic"]["threads"]
     conda:
-        "sbx_coassembly_env.yml"
+        "envs/sbx_demic_coassembly_env.yml"
     shell:
         """
         pigz -d -p {threads} -c {input.r1} > {output.r1}
@@ -124,7 +124,7 @@ rule combine_groups_paired_demic:
         w2=str(str(COASSEMBLY_DEMIC_FP / "agglomerate") + str("/*{group}_2.fastq")),
     threads: Cfg["coassembly_demic"]["threads"]
     conda:
-        "sbx_coassembly_env.yml"
+        "envs/sbx_demic_coassembly_env.yml"
     resources:
         runtime=120,
     shell:
@@ -148,7 +148,7 @@ rule coassemble_paired_demic:
         assembly_dir=str(COASSEMBLY_DEMIC_FP / "{group}"),
     threads: Cfg["coassembly_demic"]["threads"]
     conda:
-        "sbx_coassembly_env.yml"
+        "envs/sbx_demic_coassembly_env.yml"
     resources:
         mem_mb=20000,
         runtime=720,
@@ -170,7 +170,7 @@ rule maxbin:
         binned_dir = str(Cfg['all']['output_fp']) + BINNED_DIR,
         contigs_fasta = str(Cfg['all']['output_fp']) + CONTIGS_FASTA,
     conda:
-        "envs/maxbin_env.yml"
+        "envs/demic_bio_env.yml"
     shell:
         "find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && "
         "mkdir -p {params.binned_dir} && "
@@ -206,7 +206,7 @@ rule bowtie2:
     params:
         db_basename = str(Cfg['all']['output_fp']) + CONTIGS_FASTA
     conda:
-        "envs/bowtie2_env.yml"
+        "envs/demic_bio_env.yml"
     shell:
         """
         bowtie2 -q -x {params.db_basename} \
@@ -223,7 +223,7 @@ rule samtools_sort:
     threads:
         Cfg['sbx_demic']['threads']
     conda:
-        "envs/samtools_env.yml"
+        "envs/demic_bio_env.yml"
     log:
         str(MAPPING_FP/'demic'/'logs'/'samtools_{sample}.error')
     shell:
