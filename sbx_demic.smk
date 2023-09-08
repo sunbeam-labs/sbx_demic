@@ -5,11 +5,11 @@ import sys
 from pathlib import Path
 
 
-BINNED_DIR = COASSEMBLY_DEMIC_FP / "max_bin"
-CONTIGS_FASTA = BINNED_DIR / "all_final_contigs.fa"
-
 COASSEMBLY_DEMIC_FP = ASSEMBLY_FP / "coassembly_demic"
 DEMIC_FP = MAPPING_FP / "demic"
+
+BINNED_DIR = COASSEMBLY_DEMIC_FP / "max_bin"
+CONTIGS_FASTA = BINNED_DIR / "all_final_contigs.fa"
 
 TARGET_DEMIC = DEMIC_FP / "DEMIC_OUT" / "all_PTR.txt"
 
