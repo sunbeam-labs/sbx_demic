@@ -22,7 +22,7 @@ jobs:
         with:
           sunbeam-version: 'v4.0.0'
           install-options: '-m'
-          extension-name: 'sunbeam-labs/sbx_demic'
+          extension-name: 'Ulthran/sbx_demic'
           extension-branch-name: ${{ github.head_ref }}
           
       - name: Dump Logs
