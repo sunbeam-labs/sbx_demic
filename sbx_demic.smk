@@ -180,10 +180,11 @@ rule maxbin:
     conda:
         "envs/demic_bio_env.yml"
     shell:
+        #cp {input.a} {output}
         """
         find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list
         mkdir -p {params.binned_dir}
-        cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output}
+        cp {input.a} {output}
         
         if command -v MaxBin &> /dev/null
         then
