@@ -161,21 +161,44 @@ rule coassemble_paired_demic:
 
 rule maxbin:
     input:
-        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'),group=list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0]))),
+        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'), group = list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0]))),
         b = rules.all_prep_paired.input
     output:
         str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+    benchmark:
+        BENCHMARK_FP / "maxbin.tsv"
+    log:
+        LOG_FP / "maxbin.log",
     params:
         basename = str(Cfg['all']['output_fp']),
         binned_dir = str(Cfg['all']['output_fp']) + BINNED_DIR,
         contigs_fasta = str(Cfg['all']['output_fp']) + CONTIGS_FASTA,
+        maxbin_dir=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts"),
+        script=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
-        "find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list && "
-        "mkdir -p {params.binned_dir} && "
-        "cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output} && "
-        "run_MaxBin.pl -thread 10 -contig {params.contigs_fasta} -out {params.binned_dir} -reads_list {params.basename}/decontam_list"
+        """
+        find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list
+        mkdir -p {params.binned_dir}
+        cp {params.basename}/assembly/coassembly/all_final_contigs.fa {output}
+        
+        if command -v MaxBin &> /dev/null
+        then
+            cd {params.maxbin_dir}
+            {params.script} -thread 10 -contig {input.a} \
+            -out {params.binned_dir} -reads_list {params.basename}/decontam_list \
+            -verbose 2>&1 | tee {log}
+        elif command -v run_MaxBin.pl &> /dev/null
+        then
+            run_MaxBin.pl -thread 10 -contig {input.a} \
+            -out {params.binned_dir} -reads_list {params.basename}/decontam_list \
+            -verbose 2>&1 | tee {log}
+        else
+            echo "Could not find MaxBin or run_MaxBin.pl in $PATH" > {log}
+        fi
+        """
+
 
 rule bowtie2_build:
     input:
@@ -187,7 +210,7 @@ rule bowtie2_build:
     output:
         touch(str(Cfg['all']['output_fp']) + CONTIGS_FASTA + '.1.bt2')
     conda:
-        "envs/bowtie2_env.yml"
+        "envs/demic_bio_env.yml"
     shell:
         "bowtie2-build --threads {threads} {input} {params.basename}"
 
@@ -272,3 +295,11 @@ rule run_demic:
         -S {params.sam_dir} -F {params.fasta_dir} \
         -O $(dirname {output}) 2> {log}
         """
+
+rule aggregate_demic:
+    input:
+        expand(str(MAPPING_FP/'demic'/'DEMIC_OUT'/'{group}'/'all_PTR.txt'), group = list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0])))
+    output:
+        MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"
+    shell:
+        "cat {input} > output"

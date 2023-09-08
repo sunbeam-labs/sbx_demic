@@ -1,7 +1,10 @@
-name: demic_bio_env
+name: sbx_demic_bio_env
 channels:
+  #- bioconda/label/cf201901
   - bioconda
 dependencies:
-  - bowtie2
-  - maxbin2=2.2.7
+  - bowtie2=2.5.1
+  - maxbin2
+  - metabat2
+  - libdeflate # metabat2
   - samtools
