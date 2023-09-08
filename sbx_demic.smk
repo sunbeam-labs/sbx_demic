@@ -8,9 +8,6 @@ from pathlib import Path
 COASSEMBLY_DEMIC_FP = ASSEMBLY_FP / "coassembly_demic"
 DEMIC_FP = MAPPING_FP / "demic"
 
-BINNED_DIR = COASSEMBLY_DEMIC_FP / "max_bin"
-CONTIGS_FASTA = BINNED_DIR / "all_final_contigs.fa"
-
 TARGET_DEMIC = DEMIC_FP / "DEMIC_OUT" / "all_PTR.txt"
 
 try:
@@ -71,7 +68,7 @@ rule all_coassemble_demic:
             ),
         ),
         b=expand(
-            str(COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_{rp}.fastq"),
+            COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_{rp}.fastq",
             zip3l_demic,
             group=coassembly_groups_demic(
                 Cfg["coassembly_demic"]["group_file"], Samples.keys()
@@ -87,13 +84,13 @@ rule all_coassemble_demic:
 
 rule prep_samples_for_concatenation_paired_demic:
     input:
-        r1=str(QC_FP / "decontam" / "{sample}_1.fastq.gz"),
-        r2=str(QC_FP / "decontam" / "{sample}_2.fastq.gz"),
+        r1=QC_FP / "decontam" / "{sample}_1.fastq.gz",
+        r2=QC_FP / "decontam" / "{sample}_2.fastq.gz",
     output:
-        r1=temp(str(COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_1.fastq")),
-        r2=temp(str(COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_2.fastq")),
+        r1=temp(COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_1.fastq"),
+        r2=temp(COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_2.fastq"),
     benchmark:
-        BENCHMARK_FP / "prep_samples_for_concatenation_paired_{sample}_{group}.tsv"
+        BENCHMARK_FP / "prep_samples_for_concatenation_paired_demic_{sample}_{group}.tsv"
     log:
         LOG_FP / "prep_samples_for_concatenation_paired_demic_{sample}_{group}.log",
     threads: Cfg["coassembly_demic"]["threads"]
@@ -106,38 +103,12 @@ rule prep_samples_for_concatenation_paired_demic:
         """
 
 
-rule all_prep_paired:
-    input:
-        expand(
-            str(
-                ASSEMBLY_FP
-                / "coassembly"
-                / "agglomerate"
-                / "{sample}_{group}_{rp}.fastq"
-            ),
-            zip3l_demic,
-            group=coassembly_groups_demic(
-                Cfg["coassembly_demic"]["group_file"], Samples.keys()
-            )[0],
-            sample=coassembly_groups_demic(
-                Cfg["coassembly_demic"]["group_file"], Samples.keys()
-            )[1],
-            rp=coassembly_groups_demic(
-                Cfg["coassembly_demic"]["group_file"], Samples.keys()
-            )[2],
-        ),
-    output:
-        touch(ASSEMBLY_FP / "coassembly" / "agglomerate" / "prepped.done"),
-    shell:
-        'echo "samples ready to combine for co-assembly"'
-
-
 rule combine_groups_paired_demic:
     input:
         rules.all_coassemble_demic.input.b,
     output:
-        r1=str(COASSEMBLY_DEMIC_FP / "fastq" / "{group}_1.fastq.gz"),
-        r2=str(COASSEMBLY_DEMIC_FP / "fastq" / "{group}_2.fastq.gz"),
+        r1=COASSEMBLY_DEMIC_FP / "fastq" / "{group}_1.fastq.gz",
+        r2=COASSEMBLY_DEMIC_FP / "fastq" / "{group}_2.fastq.gz",
     params:
         w1=str(str(COASSEMBLY_DEMIC_FP / "agglomerate") + str("/*{group}_1.fastq")),
         w2=str(str(COASSEMBLY_DEMIC_FP / "agglomerate") + str("/*{group}_2.fastq")),
@@ -155,10 +126,10 @@ rule combine_groups_paired_demic:
 
 rule coassemble_paired_demic:
     input:
-        r1=str(COASSEMBLY_DEMIC_FP / "fastq" / "{group}_1.fastq.gz"),
-        r2=str(COASSEMBLY_DEMIC_FP / "fastq" / "{group}_2.fastq.gz"),
+        r1=COASSEMBLY_DEMIC_FP / "fastq" / "{group}_1.fastq.gz",
+        r2=COASSEMBLY_DEMIC_FP / "fastq" / "{group}_2.fastq.gz",
     output:
-        str(COASSEMBLY_DEMIC_FP / "{group}_final_contigs.fa"),
+        COASSEMBLY_DEMIC_FP / "{group}_final_contigs.fa",
     benchmark:
         BENCHMARK_FP / "coassemble_paired_{group}.tsv"
     log:
@@ -190,17 +161,17 @@ rule maxbin:
                 )
             ),
         ),
-        b=rules.all_prep_paired.input,
+        b=rules.all_coassemble_demic.input.b,
     output:
-        CONTIGS_FASTA,
+        COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta",
     benchmark:
         BENCHMARK_FP / "maxbin.tsv"
     log:
         LOG_FP / "maxbin.log",
     params:
         basename=str(Cfg["all"]["output_fp"]),
-        binned_dir=str(BINNED_DIR),
-        contigs_fasta=str(CONTIGS_FASTA),
+        binned_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
+        contigs_fasta=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta"),
         maxbin_dir=str(get_demic_path() / "MaxBin_2.2.7_scripts"),
         script=str(get_demic_path() / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     conda:
@@ -230,12 +201,12 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        CONTIGS_FASTA,
+        COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta",
     params:
-        basename=str(CONTIGS_FASTA),
+        basename=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta"),
     threads: Cfg["sbx_demic"]["threads"]
     output:
-        touch(CONTIGS_FASTA / ".1.bt2"),
+        touch(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta.1.bt2"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -255,7 +226,7 @@ rule bowtie2:
         ),
     threads: Cfg["sbx_demic"]["threads"]
     params:
-        db_basename=str(CONTIGS_FASTA),
+        db_basename=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -296,7 +267,7 @@ rule run_demic:
     params:
         demic=get_demic_path() / "vendor_demic_v1.0.2" / "DEMIC.pl",
         sam_dir=str(MAPPING_FP / "demic" / "sorted"),
-        fasta_dir=str(BINNED_DIR),
+        fasta_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
         keep_all=Cfg["sbx_demic"]["keepall"],
         extras=Cfg["sbx_demic"]["extras"],
     threads: Cfg["sbx_demic"]["threads"]
