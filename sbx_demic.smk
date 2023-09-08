@@ -5,11 +5,13 @@ import sys
 from pathlib import Path
 
 
-TARGET_DEMIC = [str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt")]
-BINNED_DIR = str(ASSEMBLY_FP / "coassembly" / "max_bin")
-CONTIGS_FASTA = BINNED_DIR + "/all_final_contigs.fa"
+BINNED_DIR = COASSEMBLY_DEMIC_FP / "max_bin"
+CONTIGS_FASTA = BINNED_DIR / "all_final_contigs.fa"
 
 COASSEMBLY_DEMIC_FP = ASSEMBLY_FP / "coassembly_demic"
+DEMIC_FP = MAPPING_FP / "demic"
+
+TARGET_DEMIC = DEMIC_FP / "DEMIC_OUT" / "all_PTR.txt"
 
 try:
     BENCHMARK_FP
@@ -21,10 +23,10 @@ except NameError:
     LOG_FP = output_subdir(Cfg, "logs")
 
 
-def get_demic_path() -> str:
+def get_demic_path() -> Path:
     for fp in sys.path:
         if fp.split("/")[-1] == "sbx_demic":
-            return fp
+            return Path(fp)
     raise Error(
         "Filepath for demic not found, are you sure it's installed under extensions/sbx_demic?"
     )
@@ -35,11 +37,11 @@ rule all_demic:
         TARGET_DEMIC,
 
 
-def zip3l(l1, l2, l3):
+def zip3l_demic(l1, l2, l3):
     return list(zip(l1, l2, l3))
 
 
-def coassembly_groups(fp, sample_list):
+def coassembly_groups_demic(fp, sample_list):
     if fp == "":
         K = ["all"] * (len(sample_list) * 2)
         V = list(sorted(sample_list)) * 2
@@ -59,10 +61,10 @@ def coassembly_groups(fp, sample_list):
 rule all_coassemble_demic:
     input:
         a=expand(
-            str(COASSEMBLY_DEMIC_FP / "{group}_final_contigs.fa"),
+            COASSEMBLY_DEMIC_FP / "{group}_final_contigs.fa",
             group=list(
                 set(
-                    coassembly_groups(
+                    coassembly_groups_demic(
                         Cfg["coassembly_demic"]["group_file"], Samples.keys()
                     )[0]
                 )
@@ -70,14 +72,14 @@ rule all_coassemble_demic:
         ),
         b=expand(
             str(COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_{rp}.fastq"),
-            zip3l,
-            group=coassembly_groups(
+            zip3l_demic,
+            group=coassembly_groups_demic(
                 Cfg["coassembly_demic"]["group_file"], Samples.keys()
             )[0],
-            sample=coassembly_groups(
+            sample=coassembly_groups_demic(
                 Cfg["coassembly_demic"]["group_file"], Samples.keys()
             )[1],
-            rp=coassembly_groups(
+            rp=coassembly_groups_demic(
                 Cfg["coassembly_demic"]["group_file"], Samples.keys()
             )[2],
         ),
@@ -113,14 +115,14 @@ rule all_prep_paired:
                 / "agglomerate"
                 / "{sample}_{group}_{rp}.fastq"
             ),
-            zip3l,
-            group=coassembly_groups(
+            zip3l_demic,
+            group=coassembly_groups_demic(
                 Cfg["coassembly_demic"]["group_file"], Samples.keys()
             )[0],
-            sample=coassembly_groups(
+            sample=coassembly_groups_demic(
                 Cfg["coassembly_demic"]["group_file"], Samples.keys()
             )[1],
-            rp=coassembly_groups(
+            rp=coassembly_groups_demic(
                 Cfg["coassembly_demic"]["group_file"], Samples.keys()
             )[2],
         ),
@@ -179,10 +181,10 @@ rule coassemble_paired_demic:
 rule maxbin:
     input:
         a=expand(
-            str(ASSEMBLY_FP / "coassembly" / "{group}_final_contigs.fa"),
+            COASSEMBLY_DEMIC_FP / "{group}_final_contigs.fa",
             group=list(
                 set(
-                    coassembly_groups(
+                    coassembly_groups_demic(
                         Cfg["coassembly_demic"]["group_file"], Samples.keys()
                     )[0]
                 )
@@ -199,8 +201,8 @@ rule maxbin:
         basename=str(Cfg["all"]["output_fp"]),
         binned_dir=BINNED_DIR,
         contigs_fasta=CONTIGS_FASTA,
-        maxbin_dir=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts"),
-        script=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
+        maxbin_dir=str(get_demic_path() / "MaxBin_2.2.7_scripts"),
+        script=str(get_demic_path() / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -283,18 +285,6 @@ rule samtools_sort:
         """
 
 
-# TODO
-# how to get the directory of this output:
-#        str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam')
-# and how to get the directory of:
-#       CONTIGS_FASTA
-# because those are the inputs of the next rule
-#
-# Maybe this will work:
-#
-# os.path.dirname
-
-
 rule run_demic:
     input:
         expand(
@@ -304,10 +294,9 @@ rule run_demic:
     output:
         str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"),
     params:
-        r_installer=get_demic_path() + "/envs/install.R",
-        demic=get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
+        demic=get_demic_path() / "vendor_demic_v1.0.2" / "DEMIC.pl",
         sam_dir=str(MAPPING_FP / "demic" / "sorted"),
-        fasta_dir=BINNED_DIR,
+        fasta_dir=str(BINNED_DIR),
         keep_all=Cfg["sbx_demic"]["keepall"],
         extras=Cfg["sbx_demic"]["extras"],
     threads: Cfg["sbx_demic"]["threads"]
@@ -317,12 +306,11 @@ rule run_demic:
     conda:
         "envs/demic_env.yml"
     log:
-        str(MAPPING_FP / "demic" / "logs" / "demic.error"),
-    # Rscript {params.r_installer} && \
+        LOG_FP / "run_demic.log",
     shell:
         """
         {params.demic} --output_all {params.keep_all} {params.extras} \
         --thread_num {threads} \
         -S {params.sam_dir} -F {params.fasta_dir} \
-        -O $(dirname {output}) 2> {log}
+        -O $(dirname {output}) 2>&1 | tee {log}
         """
