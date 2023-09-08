@@ -321,27 +321,8 @@ rule run_demic:
     # Rscript {params.r_installer} && \
     shell:
         """
-        
         {params.demic} --output_all {params.keep_all} {params.extras} \
         --thread_num {threads} \
         -S {params.sam_dir} -F {params.fasta_dir} \
         -O $(dirname {output}) 2> {log}
         """
-
-
-rule aggregate_demic:
-    input:
-        expand(
-            str(MAPPING_FP / "demic" / "DEMIC_OUT" / "{group}" / "all_PTR.txt"),
-            group=list(
-                set(
-                    coassembly_groups(
-                        Cfg["coassembly_demic"]["group_file"], Samples.keys()
-                    )[0]
-                )
-            ),
-        ),
-    output:
-        MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt",
-    shell:
-        "cat {input} > output"
