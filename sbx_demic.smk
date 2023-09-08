@@ -199,8 +199,8 @@ rule maxbin:
         LOG_FP / "maxbin.log",
     params:
         basename=str(Cfg["all"]["output_fp"]),
-        binned_dir=BINNED_DIR,
-        contigs_fasta=CONTIGS_FASTA,
+        binned_dir=str(BINNED_DIR),
+        contigs_fasta=str(CONTIGS_FASTA),
         maxbin_dir=str(get_demic_path() / "MaxBin_2.2.7_scripts"),
         script=str(get_demic_path() / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     conda:
@@ -232,10 +232,10 @@ rule bowtie2_build:
     input:
         CONTIGS_FASTA,
     params:
-        basename=CONTIGS_FASTA,
+        basename=str(CONTIGS_FASTA),
     threads: Cfg["sbx_demic"]["threads"]
     output:
-        touch(CONTIGS_FASTA + ".1.bt2"),
+        touch(CONTIGS_FASTA / ".1.bt2"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -255,7 +255,7 @@ rule bowtie2:
         ),
     threads: Cfg["sbx_demic"]["threads"]
     params:
-        db_basename=CONTIGS_FASTA,
+        db_basename=str(CONTIGS_FASTA),
     conda:
         "envs/demic_bio_env.yml"
     shell:
