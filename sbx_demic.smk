@@ -174,6 +174,9 @@ rule maxbin:
         contigs_fasta=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta"),
         maxbin_dir=str(get_demic_path() / "MaxBin_2.2.7_scripts"),
         script=str(get_demic_path() / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
+    resources:
+        mem_mb=20000,
+        runtime=720,
     conda:
         "envs/demic_bio_env.yml"
     shell:
