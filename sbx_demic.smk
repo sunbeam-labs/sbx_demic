@@ -6,11 +6,9 @@ from pathlib import Path
 from sunbeamlib import samtools
 
 
-TARGET_DEMIC = [
-    str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
-]
-BINNED_DIR = str(ASSEMBLY_FP/'coassembly'/'max_bin')
-CONTIGS_FASTA = BINNED_DIR + '/all_final_contigs.fa'
+TARGET_DEMIC = [str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt")]
+BINNED_DIR = str(ASSEMBLY_FP / "coassembly" / "max_bin")
+CONTIGS_FASTA = BINNED_DIR + "/all_final_contigs.fa"
 
 COASSEMBLY_DEMIC_FP = ASSEMBLY_FP / "coassembly_demic"
 
@@ -28,11 +26,14 @@ def get_demic_path() -> str:
     for fp in sys.path:
         if fp.split("/")[-1] == "sbx_demic":
             return fp
-    raise Error("Filepath for demic not found, are you sure it's installed under extensions/sbx_demic?")
+    raise Error(
+        "Filepath for demic not found, are you sure it's installed under extensions/sbx_demic?"
+    )
+
 
 rule all_demic:
     input:
-        TARGET_DEMIC
+        TARGET_DEMIC,
 
 
 def zip3l(l1, l2, l3):
@@ -106,9 +107,26 @@ rule prep_samples_for_concatenation_paired_demic:
 
 rule all_prep_paired:
     input:
-        expand(str(ASSEMBLY_FP/'coassembly'/'agglomerate'/'{sample}_{group}_{rp}.fastq'), zip3l, group=coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[0], sample=coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[1], rp=coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[2])
+        expand(
+            str(
+                ASSEMBLY_FP
+                / "coassembly"
+                / "agglomerate"
+                / "{sample}_{group}_{rp}.fastq"
+            ),
+            zip3l,
+            group=coassembly_groups(
+                Cfg["coassembly_demic"]["group_file"], Samples.keys()
+            )[0],
+            sample=coassembly_groups(
+                Cfg["coassembly_demic"]["group_file"], Samples.keys()
+            )[1],
+            rp=coassembly_groups(
+                Cfg["coassembly_demic"]["group_file"], Samples.keys()
+            )[2],
+        ),
     output:
-        touch(ASSEMBLY_FP/'coassembly'/'agglomerate'/'prepped.done')
+        touch(ASSEMBLY_FP / "coassembly" / "agglomerate" / "prepped.done"),
     shell:
         'echo "samples ready to combine for co-assembly"'
 
@@ -161,18 +179,27 @@ rule coassemble_paired_demic:
 
 rule maxbin:
     input:
-        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'), group = list(set(coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[0]))),
-        b = rules.all_prep_paired.input
+        a=expand(
+            str(ASSEMBLY_FP / "coassembly" / "{group}_final_contigs.fa"),
+            group=list(
+                set(
+                    coassembly_groups(
+                        Cfg["coassembly_demic"]["group_file"], Samples.keys()
+                    )[0]
+                )
+            ),
+        ),
+        b=rules.all_prep_paired.input,
     output:
-        CONTIGS_FASTA
+        CONTIGS_FASTA,
     benchmark:
         BENCHMARK_FP / "maxbin.tsv"
     log:
         LOG_FP / "maxbin.log",
     params:
-        basename = str(Cfg['all']['output_fp']),
-        binned_dir = BINNED_DIR,
-        contigs_fasta = CONTIGS_FASTA,
+        basename=str(Cfg["all"]["output_fp"]),
+        binned_dir=BINNED_DIR,
+        contigs_fasta=CONTIGS_FASTA,
         maxbin_dir=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts"),
         script=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     conda:
@@ -202,32 +229,32 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        CONTIGS_FASTA
+        CONTIGS_FASTA,
     params:
-        basename = CONTIGS_FASTA
-    threads:
-        Cfg['sbx_demic']['threads']
+        basename=CONTIGS_FASTA,
+    threads: Cfg["sbx_demic"]["threads"]
     output:
-        touch(CONTIGS_FASTA + '.1.bt2')
+        touch(CONTIGS_FASTA + ".1.bt2"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
         "bowtie2-build --threads {threads} {input} {params.basename}"
 
+
 # Run bowtie2 with index
 rule bowtie2:
     output:
-        str(MAPPING_FP/'demic'/'raw'/'{sample}.sam')
+        str(MAPPING_FP / "demic" / "raw" / "{sample}.sam"),
     input:
         rules.bowtie2_build.output,
-        reads = expand(
-            str(QC_FP/'decontam'/'{sample}_{rp}.fastq.gz'),
-            sample = Samples.keys(),
-            rp = Pairs)
-    threads:
-        Cfg['sbx_demic']['threads']
+        reads=expand(
+            str(QC_FP / "decontam" / "{sample}_{rp}.fastq.gz"),
+            sample=Samples.keys(),
+            rp=Pairs,
+        ),
+    threads: Cfg["sbx_demic"]["threads"]
     params:
-        db_basename = CONTIGS_FASTA
+        db_basename=CONTIGS_FASTA,
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -237,24 +264,25 @@ rule bowtie2:
         -S {output}
         """
 
+
 rule samtools_sort:
     input:
-        str(MAPPING_FP/'demic'/'raw'/'{sample}.sam')
+        str(MAPPING_FP / "demic" / "raw" / "{sample}.sam"),
     output:
-        temp_files = temp(str(MAPPING_FP/'demic'/'sorted'/'{sample}.bam')),
-        sorted_files = str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam')
-    threads:
-        Cfg['sbx_demic']['threads']
+        temp_files=temp(str(MAPPING_FP / "demic" / "sorted" / "{sample}.bam")),
+        sorted_files=str(MAPPING_FP / "demic" / "sorted" / "{sample}.sam"),
+    threads: Cfg["sbx_demic"]["threads"]
     conda:
         "envs/demic_bio_env.yml"
     log:
-        str(MAPPING_FP/'demic'/'logs'/'samtools_{sample}.error')
+        str(MAPPING_FP / "demic" / "logs" / "samtools_{sample}.error"),
     shell:
         """
         echo "converting to bam, sorting, and converting back to sam"
         samtools view -@ {threads} -bS {input} | samtools sort -@ {threads} - -o {output.temp_files} 2> {log}
         samtools view -@ {threads} -h {output.temp_files} > {output.sorted_files} 2>> {log}
         """
+
 
 # TODO
 # how to get the directory of this output:
@@ -267,28 +295,30 @@ rule samtools_sort:
 #
 # os.path.dirname
 
+
 rule run_demic:
     input:
-        expand(str(MAPPING_FP/'demic'/'sorted'/'{sample}.sam'),
-        sample = Samples.keys())
+        expand(
+            str(MAPPING_FP / "demic" / "sorted" / "{sample}.sam"),
+            sample=Samples.keys(),
+        ),
     output:
-        str(MAPPING_FP/'demic'/'DEMIC_OUT'/'all_PTR.txt')
+        str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"),
     params:
-        r_installer = get_demic_path() + "/envs/install.R",
-        demic = get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
-        sam_dir = str(MAPPING_FP/'demic'/'sorted'),
-        fasta_dir = BINNED_DIR,
-        keep_all = Cfg['sbx_demic']['keepall'],
-        extras = Cfg['sbx_demic']['extras'],
-    threads:
-        Cfg['sbx_demic']['threads']
+        r_installer=get_demic_path() + "/envs/install.R",
+        demic=get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
+        sam_dir=str(MAPPING_FP / "demic" / "sorted"),
+        fasta_dir=BINNED_DIR,
+        keep_all=Cfg["sbx_demic"]["keepall"],
+        extras=Cfg["sbx_demic"]["extras"],
+    threads: Cfg["sbx_demic"]["threads"]
     resources:
         mem_mb=20000,
         runtime=720,
     conda:
         "envs/demic_env.yml"
     log:
-        str(MAPPING_FP/'demic'/'logs'/'demic.error')
+        str(MAPPING_FP / "demic" / "logs" / "demic.error"),
     # Rscript {params.r_installer} && \
     shell:
         """
@@ -299,10 +329,20 @@ rule run_demic:
         -O $(dirname {output}) 2> {log}
         """
 
+
 rule aggregate_demic:
     input:
-        expand(str(MAPPING_FP/'demic'/'DEMIC_OUT'/'{group}'/'all_PTR.txt'), group = list(set(coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[0])))
+        expand(
+            str(MAPPING_FP / "demic" / "DEMIC_OUT" / "{group}" / "all_PTR.txt"),
+            group=list(
+                set(
+                    coassembly_groups(
+                        Cfg["coassembly_demic"]["group_file"], Samples.keys()
+                    )[0]
+                )
+            ),
+        ),
     output:
-        MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"
+        MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt",
     shell:
         "cat {input} > output"

@@ -20,7 +20,7 @@ jobs:
       - name: Test with Sunbeam
         uses: sunbeam-labs/sbx_test_action@v0
         with:
-          sunbeam-version: '4.0.0'
+          sunbeam-version: 'v4.0.0'
           install-options: '-m'
           extension-name: 'sunbeam-labs/sbx_demic'
           extension-branch-name: ${{ github.head_ref }}

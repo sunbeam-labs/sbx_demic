@@ -82,7 +82,7 @@ def test_full_run(run_sunbeam):
     # Check output
     assert os.path.exists(all_PTR_fp)
     assert os.stat(all_PTR_fp).st_size > 0
-    
+
     with open(all_PTR_fp) as f:
-        f.readline() # Is header
+        f.readline()  # Is header
         assert int(f.readline().split("\t")[1]) == 4
