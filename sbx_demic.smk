@@ -106,7 +106,7 @@ rule prep_samples_for_concatenation_paired_demic:
 
 rule all_prep_paired:
     input:
-        expand(str(ASSEMBLY_FP/'coassembly'/'agglomerate'/'{sample}_{group}_{rp}.fastq'), zip3l, group=coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0], sample=coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[1], rp=coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[2])
+        expand(str(ASSEMBLY_FP/'coassembly'/'agglomerate'/'{sample}_{group}_{rp}.fastq'), zip3l, group=coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[0], sample=coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[1], rp=coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[2])
     output:
         touch(ASSEMBLY_FP/'coassembly'/'agglomerate'/'prepped.done')
     shell:
@@ -161,7 +161,7 @@ rule coassemble_paired_demic:
 
 rule maxbin:
     input:
-        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'), group = list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0]))),
+        a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'), group = list(set(coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[0]))),
         b = rules.all_prep_paired.input
     output:
         str(Cfg['all']['output_fp']) + CONTIGS_FASTA
@@ -298,7 +298,7 @@ rule run_demic:
 
 rule aggregate_demic:
     input:
-        expand(str(MAPPING_FP/'demic'/'DEMIC_OUT'/'{group}'/'all_PTR.txt'), group = list(set(coassembly_groups(Cfg['sbx_coassembly']['group_file'],Samples.keys())[0])))
+        expand(str(MAPPING_FP/'demic'/'DEMIC_OUT'/'{group}'/'all_PTR.txt'), group = list(set(coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[0])))
     output:
         MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"
     shell:
