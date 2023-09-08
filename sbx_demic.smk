@@ -164,15 +164,15 @@ rule maxbin:
         a = expand(str(ASSEMBLY_FP/'coassembly'/'{group}_final_contigs.fa'), group = list(set(coassembly_groups(Cfg['coassembly_demic']['group_file'],Samples.keys())[0]))),
         b = rules.all_prep_paired.input
     output:
-        str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        CONTIGS_FASTA
     benchmark:
         BENCHMARK_FP / "maxbin.tsv"
     log:
         LOG_FP / "maxbin.log",
     params:
         basename = str(Cfg['all']['output_fp']),
-        binned_dir = str(Cfg['all']['output_fp']) + BINNED_DIR,
-        contigs_fasta = str(Cfg['all']['output_fp']) + CONTIGS_FASTA,
+        binned_dir = BINNED_DIR,
+        contigs_fasta = CONTIGS_FASTA,
         maxbin_dir=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts"),
         script=str(Path(get_demic_path()) / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     conda:
@@ -202,13 +202,13 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        CONTIGS_FASTA
     params:
-        basename = str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        basename = CONTIGS_FASTA
     threads:
         Cfg['sbx_demic']['threads']
     output:
-        touch(str(Cfg['all']['output_fp']) + CONTIGS_FASTA + '.1.bt2')
+        touch(CONTIGS_FASTA + '.1.bt2')
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -227,7 +227,7 @@ rule bowtie2:
     threads:
         Cfg['sbx_demic']['threads']
     params:
-        db_basename = str(Cfg['all']['output_fp']) + CONTIGS_FASTA
+        db_basename = CONTIGS_FASTA
     conda:
         "envs/demic_bio_env.yml"
     shell:
