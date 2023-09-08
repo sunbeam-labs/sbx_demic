@@ -3,7 +3,6 @@
 import os
 import sys
 from pathlib import Path
-from sunbeamlib import samtools
 
 
 TARGET_DEMIC = [str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt")]
