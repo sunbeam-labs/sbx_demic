@@ -277,11 +277,14 @@ rule run_demic:
         r_installer = get_demic_path() + "/envs/install.R",
         demic = get_demic_path() + "/vendor_demic_v1.0.2/DEMIC.pl",
         sam_dir = str(MAPPING_FP/'demic'/'sorted'),
-        fasta_dir = str(Cfg['all']['output_fp']) + BINNED_DIR,
+        fasta_dir = BINNED_DIR,
         keep_all = Cfg['sbx_demic']['keepall'],
         extras = Cfg['sbx_demic']['extras'],
     threads:
         Cfg['sbx_demic']['threads']
+    resources:
+        mem_mb=20000,
+        runtime=720,
     conda:
         "envs/demic_env.yml"
     log:
