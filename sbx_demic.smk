@@ -205,59 +205,55 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        COASSEMBLY_DEMIC_FP / "all_final_contigs.fa",
-    params:
-        basename=str(COASSEMBLY_DEMIC_FP / "all_final_contigs.fa"),
-    threads: Cfg["sbx_demic"]["threads"]
+        COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
     output:
-        touch(COASSEMBLY_DEMIC_FP / "all_final_contigs.fa.1.bt2"),
+        touch(COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed"),
+    params:
+        base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
+    threads: Cfg["sbx_demic"]["threads"]
     conda:
         "envs/demic_bio_env.yml"
     shell:
-        "bowtie2-build --threads {threads} {input} {params.basename}"
+        """
+        for f in {params.base_dir}/*.fasta; do
+            bowtie2-build --threads {threads} $f $f
+        done
+        """
 
 
-# Run bowtie2 with index
 rule bowtie2:
-    output:
-        str(MAPPING_FP / "demic" / "raw" / "{sample}.sam"),
     input:
-        rules.bowtie2_build.output,
+        bin_dir=COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
         reads=expand(
-            str(QC_FP / "decontam" / "{sample}_{rp}.fastq.gz"),
+            QC_FP / "decontam" / "{sample}_{rp}.fastq.gz",
             sample=Samples.keys(),
             rp=Pairs,
         ),
+        indexed=COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed",
+    output:
+        directory(MAPPING_FP / "demic" / "raw"),
     threads: Cfg["sbx_demic"]["threads"]
     params:
-        db_basename=str(COASSEMBLY_DEMIC_FP / "all_final_contigs.fa"),
+        base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
+        reads_dir=str(QC_FP / "decontam"),
     conda:
         "envs/demic_bio_env.yml"
-    shell:
-        """
-        bowtie2 -q -x {params.db_basename} \
-        -1 {input.reads[0]} -2 {input.reads[1]} -p {threads} \
-        -S {output}
-        """
+    script:
+        "scripts/bowtie2.py"
 
 
 rule samtools_sort:
     input:
-        str(MAPPING_FP / "demic" / "raw" / "{sample}.sam"),
+        MAPPING_FP / "demic" / "raw",
     output:
-        temp_files=temp(str(MAPPING_FP / "demic" / "sorted" / "{sample}.bam")),
-        sorted_files=str(MAPPING_FP / "demic" / "sorted" / "{sample}.sam"),
+        directory(MAPPING_FP / "demic" / "sorted"),
     threads: Cfg["sbx_demic"]["threads"]
     conda:
         "envs/demic_bio_env.yml"
     log:
-        str(MAPPING_FP / "demic" / "logs" / "samtools_{sample}.error"),
-    shell:
-        """
-        echo "converting to bam, sorting, and converting back to sam"
-        samtools view -@ {threads} -bS {input} | samtools sort -@ {threads} - -o {output.temp_files} 2> {log}
-        samtools view -@ {threads} -h {output.temp_files} > {output.sorted_files} 2>> {log}
-        """
+        str(MAPPING_FP / "demic" / "logs" / "samtools.error"),
+    script:
+        "scripts/samtools_sort.py"
 
 
 rule install_demic:
@@ -271,14 +267,11 @@ rule install_demic:
 
 rule run_demic:
     input:
-        expand(
-            MAPPING_FP / "demic" / "sorted" / "{sample}.sam",
-            sample=Samples.keys(),
-        ),
+        MAPPING_FP / "demic" / "sorted",
         COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
         DEMIC_FP / ".installed",
     output:
-        str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"),
+        MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt",
     params:
         demic=get_demic_path() / "vendor_demic_v1.0.2" / "DEMIC.pl",
         sam_dir=str(MAPPING_FP / "demic" / "sorted"),
