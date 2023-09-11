@@ -624,8 +624,9 @@ Arguments:
 			}
 			close COV3IN;
 			if ($test_line_num == $valid_line_num) {
-				my $output_R = $out_dir.$cov3s.'_ptr.txt';
-				my $command = "Rscript $estPTR_path $input_R $output_R $max_candidate_iter 2>>$log";
+				#my $output_R = $out_dir.$cov3s.'_ptr.txt';
+				my $output_R = $out_dir;
+				my $command = "Rscript $estPTR_path $input_R $output_R $max_candidate_iter $cov3s 2>>$log";
 				my $status2 = system($command);
 				my $exit_code2 = ($status2 >> 8) & 0xff;
 				if ($exit_code2 != 0) {

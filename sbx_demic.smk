@@ -260,12 +260,22 @@ rule samtools_sort:
         """
 
 
+rule install_demic:
+    output:
+        out=DEMIC_FP / ".installed",
+    conda:
+        "envs/demic_env.yml"
+    script:
+        "scripts/install_demic.R"
+
+
 rule run_demic:
     input:
         expand(
             str(MAPPING_FP / "demic" / "sorted" / "{sample}.sam"),
             sample=Samples.keys(),
         ),
+        DEMIC_FP / ".installed",
     output:
         str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"),
     params:
