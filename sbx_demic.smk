@@ -163,15 +163,15 @@ rule maxbin:
         ),
         b=rules.all_coassemble_demic.input.b,
     output:
-        COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta",
+        directory(COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin"),
     benchmark:
         BENCHMARK_FP / "maxbin.tsv"
     log:
         LOG_FP / "maxbin.log",
     params:
         basename=str(Cfg["all"]["output_fp"]),
-        binned_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
-        contigs_fasta=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta"),
+        binned_dir=str(COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin"),
+        contigs_fasta=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fa"),
         maxbin_dir=str(get_demic_path() / "MaxBin_2.2.7_scripts"),
         script=str(get_demic_path() / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     resources:
@@ -180,20 +180,20 @@ rule maxbin:
     conda:
         "envs/demic_bio_env.yml"
     shell:
-        #cp {input.a} {output}
         """
         find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list
         mkdir -p {params.binned_dir}
-        cp {input.a} {output}
         
         if command -v MaxBin &> /dev/null
         then
+            echo "Using included scripts for MaxBin"
             cd {params.maxbin_dir}
             {params.script} -thread 10 -contig {input.a} \
             -out {params.binned_dir} -reads_list {params.basename}/decontam_list \
             -verbose 2>&1 | tee {log}
         elif command -v run_MaxBin.pl &> /dev/null
         then
+            echo "Using built-in scripts for MaxBin"
             run_MaxBin.pl -thread 10 -contig {input.a} \
             -out {params.binned_dir} -reads_list {params.basename}/decontam_list \
             -verbose 2>&1 | tee {log}
@@ -205,12 +205,12 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta",
+        COASSEMBLY_DEMIC_FP / "all_final_contigs.fa",
     params:
-        basename=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta"),
+        basename=str(COASSEMBLY_DEMIC_FP / "all_final_contigs.fa"),
     threads: Cfg["sbx_demic"]["threads"]
     output:
-        touch(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta.1.bt2"),
+        touch(COASSEMBLY_DEMIC_FP / "all_final_contigs.fa.1.bt2"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -230,7 +230,7 @@ rule bowtie2:
         ),
     threads: Cfg["sbx_demic"]["threads"]
     params:
-        db_basename=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fasta"),
+        db_basename=str(COASSEMBLY_DEMIC_FP / "all_final_contigs.fa"),
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -272,9 +272,10 @@ rule install_demic:
 rule run_demic:
     input:
         expand(
-            str(MAPPING_FP / "demic" / "sorted" / "{sample}.sam"),
+            MAPPING_FP / "demic" / "sorted" / "{sample}.sam",
             sample=Samples.keys(),
         ),
+        COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
         DEMIC_FP / ".installed",
     output:
         str(MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt"),
