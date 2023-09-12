@@ -8,29 +8,6 @@ import sys
 import os
 
 
-# Generate n sets of test data
-# @param genome is the path to the txt file containing only sequences (our test genome)
-#        To manually prepare this file, just make a copy of your fasta and remove the
-#        lines starting with >
-# @param reads is the path to the output fastq file of generated reads WITHOUT the file extension
-# @param n is the number of read file pairs to create
-def generateN(genome: str, reads: str, n: int) -> NoReturn:
-    # fig, axs = plt.subplots(n)
-    for i in range(n):
-        c = generateTestData(genome, reads + str(i), n)
-        # axs[i].bar(c.keys(), c.values())
-        with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
-            reads + str(i) + "_R2.fastq", "rb"
-        ) as r2, gzip.open(reads + str(i) + "_R1.fastq.gz", "wb") as w1, gzip.open(
-            reads + str(i) + "_R2.fastq.gz", "wb"
-        ) as w2:
-            w1.writelines(r1)
-            w2.writelines(r2)
-        os.remove(reads + str(i) + "_R1.fastq")
-        os.remove(reads + str(i) + "_R2.fastq")
-    # plt.savefig("PLT.png")
-
-
 def f(x: int, l: int, a: int) -> int:
     return int(100 * (-a * math.cos(x / l * 2 * math.pi) + a + 1))
 
@@ -38,7 +15,7 @@ def f(x: int, l: int, a: int) -> int:
 def triangle(position: float, scale: int) -> int:
     # if position < 0.5:
     if True:
-        return int(scale * position) * 5
+        return int(scale * position * 5)
     else:
         return int(scale * (1 - position))
 
@@ -72,7 +49,7 @@ def generateTestData(genome: str, reads: str, num: int) -> Counter:
             # size: int = randrange(2*m+2, l+1)
             # readIndex: int = randrange(size-(2*m+1))
             # for it2 in range(0, f(readIndex, l, num)):
-            for it2 in range(0, triangle(it / n, 100)):
+            for it2 in range(0, triangle(it / n, num * 100)):
                 # gap: int = randrange(250)
                 gap: int = 0
                 startIndex: int = readIndex + randrange(b - 2 * m - gap)
@@ -84,8 +61,6 @@ def generateTestData(genome: str, reads: str, num: int) -> Counter:
                 writeReads(readsF_R2, complementRead(rRead[::-1]), it * 300 + it2)
 
         return c
-        # plt.bar(c.keys(), c.values())
-        # plt.savefig("PLT.png")
 
 
 # Write the given read to the given file
@@ -112,5 +87,27 @@ def complementRead(read: str) -> str:
             comp += "G"
     return comp
 
+# Generate n sets of test data
+# @param genome is the path to the txt file containing only sequences (our test genome)
+#        To manually prepare this file, just make a copy of your fasta and remove the
+#        lines starting with >
+# @param reads is the path to the output fastq file of generated reads WITHOUT the file extension
+# @param n is the number of read file pairs to create
+def generateN(genome: str, reads: str, n: int):
+    for i in range(n):
+        c = generateTestData(genome, reads + str(i), i)
+        
+        with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
+            reads + str(i) + "_R2.fastq", "rb"
+        ) as r2, gzip.open(reads + str(i) + "_R1.fastq.gz", "wb") as w1, gzip.open(
+            reads + str(i) + "_R2.fastq.gz", "wb"
+        ) as w2:
+            w1.writelines(r1)
+            w2.writelines(r2)
+        os.remove(reads + str(i) + "_R1.fastq")
+        os.remove(reads + str(i) + "_R2.fastq")
 
-generateN("reference/akk-genome.fasta", "reads/TEST", 5)
+
+generateN("reference/akk-genome.fasta", "multi-reads/Akk", 3)
+generateN("reference/Bfragilis.fasta", "multi-reads/Bfrag", 3)
+generateN("reference/Ecoli.fasta", "multi-reads/Ecoli", 3)

@@ -19,19 +19,6 @@ def setup():
 
     config_fp = os.path.join(project_dir, "sunbeam_config.yml")
 
-    config_str = f"qc: {{host_fp: {hosts_fp}}}"
-    sp.check_output(
-        [
-            "sunbeam",
-            "config",
-            "modify",
-            "-i",
-            "-s",
-            f"{config_str}",
-            f"{config_fp}",
-        ]
-    )
-
     yield temp_dir, project_dir
 
     shutil.rmtree(temp_dir)
