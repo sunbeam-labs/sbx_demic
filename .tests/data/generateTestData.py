@@ -87,6 +87,7 @@ def complementRead(read: str) -> str:
             comp += "G"
     return comp
 
+
 # Generate n sets of test data
 # @param genome is the path to the txt file containing only sequences (our test genome)
 #        To manually prepare this file, just make a copy of your fasta and remove the
@@ -96,7 +97,7 @@ def complementRead(read: str) -> str:
 def generateN(genome: str, reads: str, n: int):
     for i in range(n):
         c = generateTestData(genome, reads + str(i), n, n + i / n)
-        
+
         with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
             reads + str(i) + "_R2.fastq", "rb"
         ) as r2, gzip.open(reads + str(i) + "_R1.fastq.gz", "wb") as w1, gzip.open(
