@@ -1,5 +1,4 @@
 channels:
-    #- r
     - conda-forge
 dependencies:
     - r-base>=4.1
