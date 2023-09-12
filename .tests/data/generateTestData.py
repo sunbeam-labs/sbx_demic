@@ -12,7 +12,7 @@ def f(x: int, l: int, a: int) -> int:
     return int(100 * (-a * math.cos(x / l * 2 * math.pi) + a + 1))
 
 
-def triangle(position: float, scale: int) -> int:
+def triangle(position: float, scale: float) -> int:
     # if position < 0.5:
     if True:
         return int(scale * position * 5)
@@ -26,7 +26,7 @@ def triangle(position: float, scale: int) -> int:
 #        To manually prepare this file, just make a copy of your fasta and remove the
 #        lines starting with >
 # @param reads is the path to the output fastq file of generated reads WITHOUT the file extension
-def generateTestData(genome: str, reads: str, num: int) -> Counter:
+def generateTestData(genome: str, reads: str, num: int, PTR: float) -> Counter:
     fullGenome: str = ""
     with open(genome) as genomeF:
         for r in genomeF.readlines():
@@ -49,7 +49,7 @@ def generateTestData(genome: str, reads: str, num: int) -> Counter:
             # size: int = randrange(2*m+2, l+1)
             # readIndex: int = randrange(size-(2*m+1))
             # for it2 in range(0, f(readIndex, l, num)):
-            for it2 in range(0, triangle(it / n, num * 100)):
+            for it2 in range(0, triangle(it / n, PTR * 100)):
                 # gap: int = randrange(250)
                 gap: int = 0
                 startIndex: int = readIndex + randrange(b - 2 * m - gap)
@@ -95,7 +95,7 @@ def complementRead(read: str) -> str:
 # @param n is the number of read file pairs to create
 def generateN(genome: str, reads: str, n: int):
     for i in range(n):
-        c = generateTestData(genome, reads + str(i), i)
+        c = generateTestData(genome, reads + str(i), n, n + i / n)
         
         with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
             reads + str(i) + "_R2.fastq", "rb"
