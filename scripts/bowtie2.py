@@ -2,6 +2,9 @@ import os
 import subprocess as sp
 from pathlib import Path
 
+# Original bash command:
+# bowtie2 -q -x {input.fasta} -1 {input.reads[0]} -2 {input.reads[1]} -p {threads} -S {output}
+
 fasta_dir = Path(snakemake.params.base_dir)
 fastq_dir = Path(snakemake.params.reads_dir)
 output_dir = Path(snakemake.output[0])

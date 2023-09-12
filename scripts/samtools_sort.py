@@ -2,6 +2,10 @@ import os
 import subprocess as sp
 from pathlib import Path
 
+# Original bash commands:
+# samtools view -@ {threads} -bS {input} | samtools sort -@ {threads} - -o {output.temp_files} 2> {log}
+# samtools view -@ {threads} -h {output.temp_files} > {output.sorted_files} 2>> {log}
+
 input_dir = Path(snakemake.input[0])
 output_dir = Path(snakemake.output[0])
 
