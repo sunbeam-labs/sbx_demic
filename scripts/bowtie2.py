@@ -11,8 +11,14 @@ output_dir = Path(snakemake.output[0])
 
 os.makedirs(output_dir, exist_ok=True)
 
-for fasta in [fn for fn in os.listdir(fasta_dir) if fn.endswith(".fasta")]:
-    for fastq in [fn for fn in os.listdir(fastq_dir) if fn.endswith("_1.fastq.gz")]:
+fastas = [fn for fn in os.listdir(fasta_dir) if fn.endswith(".fasta")]
+fastqs = [fn for fn in os.listdir(fastq_dir) if fn.endswith("_1.fastq.gz")]
+fastas_len = len(fastas)
+fastqs_len = len(fastqs)
+
+for i, fasta in enumerate(fastas):
+    for j, fastq in enumerate(fastqs):
+        print(f"Progress: {str(round(100 * (i / fastas_len + (j / fastqs_len) / fastas_len), 2))}%")
         sample = fastq.replace("_1.fastq.gz", "")
         bin = fasta.split(".")[1]
 

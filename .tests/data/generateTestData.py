@@ -55,7 +55,7 @@ def generateTestData(genome: str, reads: str, num: int, PTR: float) -> Counter:
                 startIndex: int = readIndex + randrange(b - 2 * m - gap)
                 fRead: str = fullGenome[startIndex : startIndex + m]
                 rRead: str = fullGenome[startIndex + m + gap : startIndex + 2 * m + gap]
-                c[round(startIndex / b, 0)] += 1
+                c[int(startIndex / b)] += 1
 
                 writeReads(readsF_R1, fRead, it * 300 + it2)
                 writeReads(readsF_R2, complementRead(rRead[::-1]), it * 300 + it2)
@@ -96,7 +96,8 @@ def complementRead(read: str) -> str:
 # @param n is the number of read file pairs to create
 def generateN(genome: str, reads: str, n: int):
     for i in range(n):
-        c = generateTestData(genome, reads + str(i), n, n + i / n)
+        c = generateTestData(genome, reads + str(i), n, (n + 5 * i) / 5)
+        print(f"{reads + str(i)}: {sorted(c.items())}")
 
         with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
             reads + str(i) + "_R2.fastq", "rb"

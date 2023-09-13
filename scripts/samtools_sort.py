@@ -11,7 +11,12 @@ output_dir = Path(snakemake.output[0])
 
 os.makedirs(output_dir, exist_ok=True)
 
-for sam in [fn for fn in os.listdir(input_dir) if fn.endswith(".sam")]:
+sams = [fn for fn in os.listdir(input_dir) if fn.endswith(".sam")]
+sams_len = len(sams)
+
+for i, sam in enumerate(sams):
+    print(f"Progress: {str(round(100 * (i / sams_len), 2))}%")
+
     fn = sam.replace(".sam", "")
 
     args1 = [
