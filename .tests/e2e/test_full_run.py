@@ -84,6 +84,7 @@ def test_full_run(run_sunbeam):
     with open(all_PTR_fp) as f:
         f.readline()  # Is header
         results = [line.split(",") for line in f.readlines()]
+        print(results)
         assert round(float(results[0][2])) == 2
         assert round(float(results[1][2])) == 3
         assert [float(r[2]) for r in results] == sorted([float(r[2]) for r in results])
