@@ -11,13 +11,24 @@ def setup():
     temp_dir = tempfile.mkdtemp()
 
     reads_fp = os.path.abspath(".tests/data/reads/")
-    hosts_fp = os.path.abspath(".tests/data/hosts/")
 
     project_dir = os.path.join(temp_dir, "project/")
 
     sp.check_output(["sunbeam", "init", "--data_fp", reads_fp, project_dir])
 
     config_fp = os.path.join(project_dir, "sunbeam_config.yml")
+    config_str = f"sbx_demic: {{single_genome: true}}"
+    sp.check_output(
+        [
+            "sunbeam",
+            "config",
+            "modify",
+            "-i",
+            "-s",
+            f"{config_str}",
+            f"{config_fp}",
+        ]
+    )
 
     yield temp_dir, project_dir
 
@@ -72,4 +83,7 @@ def test_full_run(run_sunbeam):
 
     with open(all_PTR_fp) as f:
         f.readline()  # Is header
-        assert int(f.readline().split("\t")[1]) == 4
+        results = [line.split(",") for line in f.readlines()]
+        assert int(results[0][2]) == 2
+        assert int(results[1][2]) == 3
+        assert [r[2] for r in results] == sorted([r[2] for r in results])

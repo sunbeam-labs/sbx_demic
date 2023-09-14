@@ -76,9 +76,9 @@ rule all_coassemble_demic:
             sample=coassembly_groups_demic(
                 Cfg["sbx_demic"]["group_file"], Samples.keys()
             )[1],
-            rp=coassembly_groups_demic(
-                Cfg["sbx_demic"]["group_file"], Samples.keys()
-            )[2],
+            rp=coassembly_groups_demic(Cfg["sbx_demic"]["group_file"], Samples.keys())[
+                2
+            ],
         ),
 
 
@@ -301,6 +301,7 @@ rule run_demic:
         -S {params.sam_dir} -F {params.fasta_dir} \
         -O {output} 2>&1 | tee {log}
         """
+
 
 rule aggregate_demic:
     input:

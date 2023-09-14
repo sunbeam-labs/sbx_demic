@@ -18,7 +18,9 @@ fastqs_len = len(fastqs)
 
 for i, fasta in enumerate(fastas):
     for j, fastq in enumerate(fastqs):
-        print(f"Progress: {str(round(100 * (i / fastas_len + (j / fastqs_len) / fastas_len), 2))}%")
+        print(
+            f"Progress: {str(round(100 * (i / fastas_len + (j / fastqs_len) / fastas_len), 2))}%"
+        )
         sample = fastq.replace("_1.fastq.gz", "")
         bin = fasta.split(".")[1]
 
