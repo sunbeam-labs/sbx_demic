@@ -529,74 +529,6 @@ Arguments:
 	}
 	@ths = ();
 
-	# Check if there is any cov3 file that was failed to be processed
-
-	my %failed_cov3;
-	opendir OUTCHECK2, $out_dir;
-	for my $file (readdir OUTCHECK2) {
-		if ($file =~ /_ptr.log$/) {
-			open FAILLOG, "<", $out_dir.$file or die "cannot open $out_dir$file: $!";
-			while (<FAILLOG>) {
-				chomp;
-				my @line = split /\s+/;
-				next if $line[0] eq 'Failed';
-				$failed_cov3{$_} = 1 for @line;	#
-			}
-			close FAILLOG;
-		}
-	}
-	closedir OUTCHECK2;
-
-	# Summarize to output dynamics estimations
-
-	my %PTR_contig_samples;
-	while (my ($fasta_ID, undef) = each %cov3line) {
-		if (exists $failed_cov3{$fasta_ID}) {
-			$PTR_contig_samples{$fasta_ID} = 0;
-		} else {
-			open COV3IN, "<", $out_dir.$fasta_ID.'_ptr.txt' or die "cannot open $out_dir${fasta_ID}_ptr.txt: $!";
-			while (<COV3IN>) {
-				chomp;
-				my @line = split /\t/;
-
-				next if $line[-2] eq 'cor';
-				$PTR_contig_samples{$fasta_ID}{$line[1]} = $line[2];
-			}
-			close COV3IN;
-		}
-	}
-
-	my @total_samples_sort = sort {$a cmp $b} (keys %total_samples);
-	open OUTPTR, ">", $out_dir.'all_PTR.txt';
-	print OUTPTR "\t$_" for @total_samples_sort;
-	print OUTPTR "\n";
-	while (my ($fasta_ID, $sample_ref) = each %PTR_contig_samples) {
-		print OUTPTR "$fasta_ID";
-		for my $sample (@total_samples_sort) {
-			if (ref($sample_ref) eq "HASH" and exists ${$sample_ref}{$sample}) {
-				printf OUTPTR "\t%.4f", ${$sample_ref}{$sample};
-			} else {
-				print OUTPTR "\tNA";
-			}
-		}
-		print OUTPTR "\n";
-	}
-	close OUTPTR;
-
-	if($output_all eq 'no') {
-		for my $sam (@sams) {
-			system "rm $out_dir$sam.cov";
-			system "rm $out_dir$sam.cov2";
-		}
-		for my $fasta (@fastas) {
-			$fasta =~ /(^.+)\.f\w*a$/i;
-			my $fasta_ID = $1;
-			if (-e $out_dir.$fasta_ID.'.cov3') {
-				system "rm $out_dir$fasta_ID.cov3";
-			}
-		}
-	}
-
 	print "$program finishes its work. Please see ${out_dir}all_PTR.txt for details.\n" if $quiet eq 'no';
 
 	### Subroutine of invoking R for growth estimation from cov3 files
@@ -624,8 +556,10 @@ Arguments:
 			}
 			close COV3IN;
 			if ($test_line_num == $valid_line_num) {
-				my $output_R = $out_dir.$cov3s.'_ptr.txt';
-				my $command = "Rscript $estPTR_path $input_R $output_R $max_candidate_iter 2>>$log";
+				#my $output_R = $out_dir.$cov3s.'_ptr.txt';
+				my $output_R = $out_dir;
+				my $ptr = $cov3s.'.ptr';
+				my $command = "Rscript $estPTR_path $input_R $output_R $max_candidate_iter $ptr 2>>$log";
 				my $status2 = system($command);
 				my $exit_code2 = ($status2 >> 8) & 0xff;
 				if ($exit_code2 != 0) {

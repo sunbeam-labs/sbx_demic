@@ -1,41 +1,28 @@
 from io import TextIOWrapper
-from random import randrange
-from typing import NoReturn
-import math
+import random
 from collections import Counter
 import gzip
-import sys
 import os
 
-# Generate n sets of test data
-# @param genome is the path to the txt file containing only sequences (our test genome)
-#        To manually prepare this file, just make a copy of your fasta and remove the
-#        lines starting with >
-# @param reads is the path to the output fastq file of generated reads WITHOUT the file extension
-# @param n is the number of read file pairs to create
-def generateN(genome: str, reads: str, n: int) -> NoReturn:
-    #fig, axs = plt.subplots(n)
-    for i in range(n):
-        c = generateTestData(genome, reads + str(i), n)
-        #axs[i].bar(c.keys(), c.values())
-        with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(reads + str(i) + "_R2.fastq", "rb") as r2, gzip.open(reads + str(i) + "_R1.fastq.gz", "wb") as w1, gzip.open(reads + str(i) + "_R2.fastq.gz", "wb") as w2:
-            w1.writelines(r1)
-            w2.writelines(r2)
-        os.remove(reads + str(i) + "_R1.fastq")
-        os.remove(reads + str(i) + "_R2.fastq")
-    #plt.savefig("PLT.png")
 
-
-def f(x: int, l: int, a: int) -> int:
-    return int(100 * (-a * math.cos(x / l * 2 * math.pi) + a + 1))
-
-
-def triangle(position: float, scale: int) -> int:
-    #if position < 0.5:
-    if True:
-        return int(scale * position) * 5
+def triangle(position: float, PTR: float, min_reads: int) -> int:
+    assert PTR > 1
+    assert 0 <= position <= 1
+    if position < 0.5:
+        return int((PTR - 1) * min_reads * 2 * position) + min_reads
     else:
-        return int(scale * (1 - position))
+        return int((PTR - 1) * min_reads * 2 * (1 - position)) + min_reads
+
+
+def get_read(genome: str, start_index: int, read_length: int) -> str:
+    genome_length = len(genome)
+    start_index = start_index % genome_length  # Make sure start_index is on genome
+    if start_index + read_length < genome_length:
+        return genome[start_index : start_index + read_length]
+    else:
+        spillover = start_index + read_length - genome_length
+        return genome[start_index:] + genome[:spillover]
+
 
 # Generates a triangular distribution of reads from input sequence data
 # mimicing the distribution of reads from a growing bacterial population
@@ -43,41 +30,52 @@ def triangle(position: float, scale: int) -> int:
 #        To manually prepare this file, just make a copy of your fasta and remove the
 #        lines starting with >
 # @param reads is the path to the output fastq file of generated reads WITHOUT the file extension
-def generateTestData(genome: str, reads: str, num: int) -> Counter:
-    fullGenome: str = ""
-    with open(genome) as genomeF:
-        for r in genomeF.readlines():
+def generateTestData(genome_fp: str, reads: str, num_reads: int, PTR: float) -> Counter:
+    genome: str = ""
+    with open(genome_fp) as genome_f:
+        for r in genome_f.readlines():
             if r[0] != ">":
-                fullGenome += r.strip()
-    
-    with open(reads + "_R1.fastq", "w") as readsF_R1, open(reads + "_R2.fastq", "w") as readsF_R2:
+                genome += r.strip()
+
+    with open(reads + "_R1.fastq", "w") as readsF_R1, open(
+        reads + "_R2.fastq", "w"
+    ) as readsF_R2:
         # Generate n sequences from the replication origin (assumed to be the start of the file)
         # of random length (0 to len(genome)) and then take a random substring of length m
         # from that to add to the fastq file
         c: Counter = Counter()
-        n: int = 100
-        m: int = 125
-        l: int = len(fullGenome)
-        b: int = int(l / n)
-        for it in range(0, n):
-            readIndex: int = it * b
-            #size: int = randrange(2*m+2, l+1)
-            #readIndex: int = randrange(size-(2*m+1))
-            #for it2 in range(0, f(readIndex, l, num)):
-            for it2 in range(0, triangle(it/n, 100)):
-                #gap: int = randrange(250)
-                gap: int = 0
-                startIndex: int = readIndex + randrange(b - 2 * m - gap)
-                fRead: str = fullGenome[startIndex : startIndex + m]
-                rRead: str = fullGenome[startIndex + m + gap : startIndex + 2 * m + gap]
-                c[round(startIndex / b, 0)] += 1
+        genome_length: int = len(genome)
+        read_length: int = 250
+        gap: int = 0
+        min_triangle: int = 100
 
-                writeReads(readsF_R1, fRead, it * 300 + it2)
-                writeReads(readsF_R2, complementRead(rRead[::-1]), it * 300 + it2)
+        # num_reads = triangle_area + underneath_rect_area
+        # num_reads = 0.5 * (PTR * min_triangle - min_triangle) * num_steps + min_triangle * num_steps
+        # num_reads = (0.5 * PTR + 1 - 0.5) * min_triangle * num_steps
+        num_steps: int = int(num_reads / ((0.5 * PTR + 0.5) * min_triangle))
+        step_range: int = genome_length / (2 * num_steps)
+
+        total: int = 0
+        for i in range(num_steps):
+            reads_for_step = triangle(i / num_steps, PTR, min_triangle)
+            c[i] = reads_for_step
+            for j in range(reads_for_step):
+                start_index = int(
+                    random.random() * 2 * step_range
+                    + genome_length * (i / num_steps)
+                    - step_range
+                )
+                forward_read = get_read(genome, start_index, read_length)
+                reverse_read = get_read(
+                    genome, start_index + read_length + gap, read_length
+                )
+
+                writeReads(readsF_R1, forward_read, total)
+                writeReads(readsF_R2, complementRead(reverse_read[::-1]), total)
+
+                total += 1
 
         return c
-        # plt.bar(c.keys(), c.values())
-        # plt.savefig("PLT.png")
 
 
 # Write the given read to the given file
@@ -94,15 +92,41 @@ def writeReads(readsF: TextIOWrapper, read: str, it: int) -> None:
 def complementRead(read: str) -> str:
     comp = ""
     for c in read:
-        if c == 'A':
-            comp += 'T'
-        if c == 'T':
-            comp += 'A'
-        if c == 'G':
-            comp += 'C'
-        if c == 'C':
-            comp += 'G'
+        if c == "A":
+            comp += "T"
+        if c == "T":
+            comp += "A"
+        if c == "G":
+            comp += "C"
+        if c == "C":
+            comp += "G"
     return comp
 
 
-generateN("reference/akk-genome.fasta", "reads/TEST", 5)
+# Generate n sets of test data
+# @param genome is the path to the txt file containing only sequences (our test genome)
+#        To manually prepare this file, just make a copy of your fasta and remove the
+#        lines starting with >
+# @param reads is the path to the output fastq file of generated reads WITHOUT the file extension
+# @param n is the number of read file pairs to create
+def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
+    for i in range(n):
+        c = generateTestData(genome, reads + str(i), reads_per_sample, i + 2)
+        print(f"{reads + str(i)}: {sorted(c.items())}")
+
+        with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
+            reads + str(i) + "_R2.fastq", "rb"
+        ) as r2, gzip.open(reads + str(i) + "_R1.fastq.gz", "wb") as w1, gzip.open(
+            reads + str(i) + "_R2.fastq.gz", "wb"
+        ) as w2:
+            w1.writelines(r1)
+            w2.writelines(r2)
+        os.remove(reads + str(i) + "_R1.fastq")
+        os.remove(reads + str(i) + "_R2.fastq")
+
+
+# generateN("reference/akk-genome.fasta", "multi-reads/Akk", 3)
+# generateN("reference/Bfragilis.fasta", "multi-reads/Bfrag", 3)
+# generateN("reference/Ecoli.fasta", "multi-reads/Ecoli", 3)
+
+generateN("reference/Bfragilis.fasta", "reads/Bfrag", 3, 25000)
