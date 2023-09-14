@@ -7,7 +7,7 @@ import tempfile
 
 
 @pytest.fixture
-def setup():
+def setup_single_genome():
     temp_dir = tempfile.mkdtemp()
 
     reads_fp = os.path.abspath(".tests/data/reads/")
@@ -36,8 +36,8 @@ def setup():
 
 
 @pytest.fixture
-def run_sunbeam(setup):
-    temp_dir, project_dir = setup
+def run_sunbeam_single_genome(setup_single_genome):
+    temp_dir, project_dir = setup_single_genome
 
     output_fp = os.path.join(project_dir, "sunbeam_output")
 
@@ -72,8 +72,8 @@ def run_sunbeam(setup):
     yield output_fp, benchmarks_fp
 
 
-def test_full_run(run_sunbeam):
-    output_fp, benchmarks_fp = run_sunbeam
+def test_full_run(run_sunbeam_single_genome):
+    output_fp, benchmarks_fp = run_sunbeam_single_genome
 
     all_PTR_fp = os.path.join(output_fp, "mapping/demic/all_PTR.txt")
 
