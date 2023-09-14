@@ -13,14 +13,16 @@ def triangle(position: float, PTR: float, min_reads: int) -> int:
     else:
         return int((PTR - 1) * min_reads * 2 * (1 - position)) + min_reads
 
+
 def get_read(genome: str, start_index: int, read_length: int) -> str:
     genome_length = len(genome)
-    start_index = start_index % genome_length # Make sure start_index is on genome
+    start_index = start_index % genome_length  # Make sure start_index is on genome
     if start_index + read_length < genome_length:
         return genome[start_index : start_index + read_length]
     else:
         spillover = start_index + read_length - genome_length
-        return genome[start_index : ] + genome[ : spillover]
+        return genome[start_index:] + genome[:spillover]
+
 
 # Generates a triangular distribution of reads from input sequence data
 # mimicing the distribution of reads from a growing bacterial population
@@ -58,17 +60,23 @@ def generateTestData(genome_fp: str, reads: str, num_reads: int, PTR: float) -> 
             reads_for_step = triangle(i / num_steps, PTR, min_triangle)
             c[i] = reads_for_step
             for j in range(reads_for_step):
-                start_index = int(random.random() * 2 * step_range + genome_length * (i / num_steps) - step_range)
+                start_index = int(
+                    random.random() * 2 * step_range
+                    + genome_length * (i / num_steps)
+                    - step_range
+                )
                 forward_read = get_read(genome, start_index, read_length)
-                reverse_read = get_read(genome, start_index + read_length + gap, read_length)
+                reverse_read = get_read(
+                    genome, start_index + read_length + gap, read_length
+                )
 
                 writeReads(readsF_R1, forward_read, total)
                 writeReads(readsF_R2, complementRead(reverse_read[::-1]), total)
 
                 total += 1
-        
+
         return c
-    
+
 
 # Write the given read to the given file
 # @param readsF is the file to write to
@@ -117,8 +125,8 @@ def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
         os.remove(reads + str(i) + "_R2.fastq")
 
 
-#generateN("reference/akk-genome.fasta", "multi-reads/Akk", 3)
-#generateN("reference/Bfragilis.fasta", "multi-reads/Bfrag", 3)
-#generateN("reference/Ecoli.fasta", "multi-reads/Ecoli", 3)
+# generateN("reference/akk-genome.fasta", "multi-reads/Akk", 3)
+# generateN("reference/Bfragilis.fasta", "multi-reads/Bfrag", 3)
+# generateN("reference/Ecoli.fasta", "multi-reads/Ecoli", 3)
 
 generateN("reference/Bfragilis.fasta", "reads/Bfrag", 3, 25000)
