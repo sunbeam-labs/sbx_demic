@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [ master, main ]
+  push:
+    branches: [ master, main ]
+  schedule:
+    - cron: "0 13 * * 1"
+
+jobs:  
+  test-e2e:
+    name: Test Extension with Sunbeam
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      - name: Test with Sunbeam
+        uses: sunbeam-labs/sbx_test_action@v0
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          sunbeam-version: 'v4.0.0'
+          install-options: '-m'
+          extension-name: 'Ulthran/sbx_demic'
+          extension-branch-name: ${{ github.head_ref }}
+          
+      - name: Dump Logs
+        shell: bash
+        if: always()
+        run: tail -n +1 logs/*
+      
+      - name: Dump Stats
+        shell: bash
+        if: always()
+        run: cat stats/*

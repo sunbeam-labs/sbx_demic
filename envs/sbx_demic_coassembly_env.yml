@@ -1,0 +1,7 @@
+name: sbx_demic_coassembly_env
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - megahit
+  - pigz
