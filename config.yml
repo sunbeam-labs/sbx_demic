@@ -3,5 +3,4 @@ sbx_demic:
   group_file: ""
   demic_threads: 4
   single_genome: false # Switch to true if your samples only contain a single species
-  keepall: false
   extras: "" # Parameters passed to DEMIC.pl

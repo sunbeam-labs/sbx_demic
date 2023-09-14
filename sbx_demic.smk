@@ -284,7 +284,6 @@ rule run_demic:
         demic=get_demic_path() / "vendor_demic_v1.0.2" / "DEMIC.pl",
         sam_dir=str(DEMIC_FP / "sorted"),
         fasta_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
-        keep_all=Cfg["sbx_demic"]["keepall"],
         extras=Cfg["sbx_demic"]["extras"],
     threads: Cfg["sbx_demic"]["demic_threads"]
     resources:
@@ -296,7 +295,7 @@ rule run_demic:
         LOG_FP / "run_demic.log",
     shell:
         """
-        {params.demic} --output_all {params.keep_all} {params.extras} \
+        {params.demic} {params.extras} \
         --thread_num {threads} \
         -S {params.sam_dir} -F {params.fasta_dir} \
         -O {output} 2>&1 | tee {log}
