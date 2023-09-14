@@ -1,7 +1,7 @@
-coassembly_demic:
-  threads: 4
-  group_file: ""
 sbx_demic:
-  threads: 4
-  keepall: FALSE
+  coassembly_threads: 4
+  group_file: ""
+  demic_threads: 4
+  single_genome: false # Switch to true if your samples only contain a single species
+  keepall: false
   extras: "" # Parameters passed to DEMIC.pl

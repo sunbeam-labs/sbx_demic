@@ -101,9 +101,9 @@ def complementRead(read: str) -> str:
 #        lines starting with >
 # @param reads is the path to the output fastq file of generated reads WITHOUT the file extension
 # @param n is the number of read file pairs to create
-def generateN(genome: str, reads: str, n: int):
+def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
     for i in range(n):
-        c = generateTestData(genome, reads + str(i), 50000, i + 2)
+        c = generateTestData(genome, reads + str(i), reads_per_sample, i + 2)
         print(f"{reads + str(i)}: {sorted(c.items())}")
 
         with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
@@ -117,6 +117,8 @@ def generateN(genome: str, reads: str, n: int):
         os.remove(reads + str(i) + "_R2.fastq")
 
 
-generateN("reference/akk-genome.fasta", "multi-reads/Akk", 3)
-generateN("reference/Bfragilis.fasta", "multi-reads/Bfrag", 3)
-generateN("reference/Ecoli.fasta", "multi-reads/Ecoli", 3)
+#generateN("reference/akk-genome.fasta", "multi-reads/Akk", 3)
+#generateN("reference/Bfragilis.fasta", "multi-reads/Bfrag", 3)
+#generateN("reference/Ecoli.fasta", "multi-reads/Ecoli", 3)
+
+generateN("reference/Bfragilis.fasta", "reads/Bfrag", 3, 25000)

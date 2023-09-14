@@ -64,7 +64,7 @@ def run_sunbeam(setup):
 def test_full_run(run_sunbeam):
     output_fp, benchmarks_fp = run_sunbeam
 
-    all_PTR_fp = os.path.join(output_fp, "mapping/demic/DEMIC_OUT/all_PTR.txt")
+    all_PTR_fp = os.path.join(output_fp, "mapping/demic/all_PTR.txt")
 
     # Check output
     assert os.path.exists(all_PTR_fp)

@@ -8,7 +8,7 @@ from pathlib import Path
 COASSEMBLY_DEMIC_FP = ASSEMBLY_FP / "coassembly_demic"
 DEMIC_FP = MAPPING_FP / "demic"
 
-TARGET_DEMIC = DEMIC_FP / "DEMIC_OUT" / "all_PTR.txt"
+TARGET_DEMIC = DEMIC_FP / "all_PTR.txt"
 
 try:
     BENCHMARK_FP
@@ -62,7 +62,7 @@ rule all_coassemble_demic:
             group=list(
                 set(
                     coassembly_groups_demic(
-                        Cfg["coassembly_demic"]["group_file"], Samples.keys()
+                        Cfg["sbx_demic"]["group_file"], Samples.keys()
                     )[0]
                 )
             ),
@@ -71,13 +71,13 @@ rule all_coassemble_demic:
             COASSEMBLY_DEMIC_FP / "agglomerate" / "{sample}_{group}_{rp}.fastq",
             zip3l_demic,
             group=coassembly_groups_demic(
-                Cfg["coassembly_demic"]["group_file"], Samples.keys()
+                Cfg["sbx_demic"]["group_file"], Samples.keys()
             )[0],
             sample=coassembly_groups_demic(
-                Cfg["coassembly_demic"]["group_file"], Samples.keys()
+                Cfg["sbx_demic"]["group_file"], Samples.keys()
             )[1],
             rp=coassembly_groups_demic(
-                Cfg["coassembly_demic"]["group_file"], Samples.keys()
+                Cfg["sbx_demic"]["group_file"], Samples.keys()
             )[2],
         ),
 
@@ -93,7 +93,7 @@ rule prep_samples_for_concatenation_paired_demic:
         BENCHMARK_FP / "prep_samples_for_concatenation_paired_demic_{sample}_{group}.tsv"
     log:
         LOG_FP / "prep_samples_for_concatenation_paired_demic_{sample}_{group}.log",
-    threads: Cfg["coassembly_demic"]["threads"]
+    threads: Cfg["sbx_demic"]["coassembly_threads"]
     conda:
         "envs/sbx_demic_coassembly_env.yml"
     shell:
@@ -112,7 +112,7 @@ rule combine_groups_paired_demic:
     params:
         w1=str(str(COASSEMBLY_DEMIC_FP / "agglomerate") + str("/*{group}_1.fastq")),
         w2=str(str(COASSEMBLY_DEMIC_FP / "agglomerate") + str("/*{group}_2.fastq")),
-    threads: Cfg["coassembly_demic"]["threads"]
+    threads: Cfg["sbx_demic"]["coassembly_threads"]
     conda:
         "envs/sbx_demic_coassembly_env.yml"
     resources:
@@ -136,7 +136,7 @@ rule coassemble_paired_demic:
         LOG_FP / "coassemble_paired_demic_{group}.log",
     params:
         assembly_dir=str(COASSEMBLY_DEMIC_FP / "{group}"),
-    threads: Cfg["coassembly_demic"]["threads"]
+    threads: Cfg["sbx_demic"]["coassembly_threads"]
     conda:
         "envs/sbx_demic_coassembly_env.yml"
     resources:
@@ -156,7 +156,7 @@ rule maxbin:
             group=list(
                 set(
                     coassembly_groups_demic(
-                        Cfg["coassembly_demic"]["group_file"], Samples.keys()
+                        Cfg["sbx_demic"]["group_file"], Samples.keys()
                     )[0]
                 )
             ),
@@ -170,8 +170,9 @@ rule maxbin:
         LOG_FP / "maxbin.log",
     params:
         basename=str(Cfg["all"]["output_fp"]),
+        single_genome=str(Cfg["sbx_demic"]["single_genome"]),
         binned_dir=str(COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin"),
-        contigs_fasta=str(COASSEMBLY_DEMIC_FP / "max_bin" / "all_final_contigs.fa"),
+        output=str(COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin.001.fasta"),
         maxbin_dir=str(get_demic_path() / "MaxBin_2.2.7_scripts"),
         script=str(get_demic_path() / "MaxBin_2.2.7_scripts" / "run_MaxBin.pl"),
     resources:
@@ -183,7 +184,14 @@ rule maxbin:
         """
         find {params.basename}/qc/decontam -iname '*.fastq.gz' > {params.basename}/decontam_list
         mkdir -p {params.binned_dir}
-        
+
+        if [ {params.single_genome} = "True" ] || [ {params.single_genome} = "true" ] || [ {params.single_genome} = "TRUE" ]
+        then
+            echo "Single genome, skipping MaxBin"
+            cp {input.a} {params.output}
+            exit 0
+        fi
+
         if command -v MaxBin &> /dev/null
         then
             echo "Using included scripts for MaxBin"
@@ -210,7 +218,7 @@ rule bowtie2_build:
         touch(COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed"),
     params:
         base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
-    threads: Cfg["sbx_demic"]["threads"]
+    threads: Cfg["sbx_demic"]["demic_threads"]
     conda:
         "envs/demic_bio_env.yml"
     shell:
@@ -231,8 +239,8 @@ rule bowtie2:
         ),
         indexed=COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed",
     output:
-        directory(MAPPING_FP / "demic" / "raw"),
-    threads: Cfg["sbx_demic"]["threads"]
+        directory(DEMIC_FP / "raw"),
+    threads: Cfg["sbx_demic"]["demic_threads"]
     params:
         base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
         reads_dir=str(QC_FP / "decontam"),
@@ -244,14 +252,14 @@ rule bowtie2:
 
 rule samtools_sort:
     input:
-        MAPPING_FP / "demic" / "raw",
+        DEMIC_FP / "raw",
     output:
-        directory(MAPPING_FP / "demic" / "sorted"),
-    threads: Cfg["sbx_demic"]["threads"]
+        directory(DEMIC_FP / "sorted"),
+    threads: Cfg["sbx_demic"]["demic_threads"]
     conda:
         "envs/demic_bio_env.yml"
     log:
-        str(MAPPING_FP / "demic" / "logs" / "samtools.error"),
+        str(DEMIC_FP / "logs" / "samtools.error"),
     script:
         "scripts/samtools_sort.py"
 
@@ -267,18 +275,18 @@ rule install_demic:
 
 rule run_demic:
     input:
-        MAPPING_FP / "demic" / "sorted",
+        DEMIC_FP / "sorted",
         COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
         DEMIC_FP / ".installed",
     output:
-        MAPPING_FP / "demic" / "DEMIC_OUT" / "all_PTR.txt",
+        directory(DEMIC_FP / "DEMIC_OUT"),
     params:
         demic=get_demic_path() / "vendor_demic_v1.0.2" / "DEMIC.pl",
-        sam_dir=str(MAPPING_FP / "demic" / "sorted"),
+        sam_dir=str(DEMIC_FP / "sorted"),
         fasta_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
         keep_all=Cfg["sbx_demic"]["keepall"],
         extras=Cfg["sbx_demic"]["extras"],
-    threads: Cfg["sbx_demic"]["threads"]
+    threads: Cfg["sbx_demic"]["demic_threads"]
     resources:
         mem_mb=20000,
         runtime=720,
@@ -291,5 +299,15 @@ rule run_demic:
         {params.demic} --output_all {params.keep_all} {params.extras} \
         --thread_num {threads} \
         -S {params.sam_dir} -F {params.fasta_dir} \
-        -O $(dirname {output}) 2>&1 | tee {log}
+        -O {output} 2>&1 | tee {log}
+        """
+
+rule aggregate_demic:
+    input:
+        DEMIC_FP / "DEMIC_OUT",
+    output:
+        DEMIC_FP / "all_PTR.txt",
+    shell:
+        """
+        cat {input}/*.ptr> {output}
         """
