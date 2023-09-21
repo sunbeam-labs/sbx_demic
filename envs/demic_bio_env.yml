@@ -4,7 +4,7 @@ channels:
   - bioconda
 dependencies:
   - bowtie2=2.5.1
-  - maxbin2
+  - maxbin2=2.2.7
   - metabat2
   - libdeflate # metabat2
   - samtools
