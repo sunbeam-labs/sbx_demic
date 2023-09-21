@@ -1,7 +1,7 @@
 files <- list.files(path=snakemake@input[['input']], pattern="*.cov3", full.names=TRUE, recursive=FALSE)
 lapply(files, function(x) {
     X <- read.csv(x, header = FALSE, stringsAsFactors = TRUE)
-    colnames(X) <- c("logCov", "GC", "sample", "contig", "length")
+    colnames(X) <- c("log_cov", "GC_content", "sample", "contig", "length")
     O <- demic::est_ptr(X)
     
     dir.create(snakemake@output[['out']])
