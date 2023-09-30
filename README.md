@@ -5,6 +5,7 @@
 <!-- Begin badges -->
 [![Tests](https://github.com/sunbeam-labs/sbx_demic/actions/workflows/test.yml/badge.svg)](https://github.com/sunbeam-labs/sbx_demic/actions/workflows/test.yml)
 [![Super-Linter](https://github.com/sunbeam-labs/sbx_demic/actions/workflows/linter.yml/badge.svg)](https://github.com/sunbeam-labs/sbx_demic/actions/workflows/linter.yml)
+[![Conda Envs Status](https://byob.yarr.is/sunbeam-labs/sbx_demic/env_check)](https://github.com/sunbeam-labs/sbx_demic/actions/workflows/check_conda_envs.yml)
 [![DOI:10.1038/s41592-018-0182-0](https://badgen.net/badge/Published%20in/Nat%20Methods/blue)](https://doi.org/10.1038/s41592-018-0182-0)
 <!-- End badges -->
 
