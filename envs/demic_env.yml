@@ -6,3 +6,5 @@ dependencies:
   - r-factominer
   - r-reshape2
   - r-devtools
+  - pip:
+    - pycov3

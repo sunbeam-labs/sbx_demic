@@ -293,7 +293,6 @@ rule run_pycov3:
         LOG_FP / "run_pycov3.log",
     shell:
         """
-        pip install pycov3
         pycov3 -S {params.sam_dir} -F {params.fasta_dir} -O {output} -X 2>&1 | tee {log}
         """
 
