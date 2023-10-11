@@ -23,7 +23,7 @@ jobs:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         with:
           sunbeam-version: 'main'
-          install-options: '-m'
+          install-options: ''
           extension-name: 'sunbeam-labs/sbx_demic'
           extension-branch-name: ${{ github.head_ref }}
           
