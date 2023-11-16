@@ -18,14 +18,9 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Test with Sunbeam
-        uses: sunbeam-labs/sbx_test_action@v0
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          sunbeam-version: 'main'
-          install-options: ''
-          extension-name: 'sunbeam-labs/sbx_demic'
-          extension-branch-name: ${{ github.head_ref }}
+        uses: sunbeam-labs/sbx_test_action@v1
+        #env:
+        #  GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Dump Logs
         shell: bash
