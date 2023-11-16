@@ -19,8 +19,9 @@ jobs:
         
       - name: Test with Sunbeam
         uses: sunbeam-labs/sbx_test_action@v1
-        #env:
-        #  GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          # Used by DEMIC install rule
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Dump Logs
         shell: bash
