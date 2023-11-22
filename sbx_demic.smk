@@ -267,6 +267,8 @@ rule samtools_sort:
 rule install_demic:
     output:
         out=DEMIC_FP / ".installed",
+    log:
+        log=LOG_FP / "install_demic.log",
     conda:
         "envs/demic_env.yml"
     script:
