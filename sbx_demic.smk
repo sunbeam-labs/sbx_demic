@@ -310,5 +310,5 @@ rule aggregate_demic:
         DEMIC_FP / "all_PTR.txt",
     shell:
         """
-        cat {input}/*.ptr> {output}
+        cat {input}/*.txt > {output}
         """
