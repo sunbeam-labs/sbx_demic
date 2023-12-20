@@ -1,22 +1,20 @@
-import os
 import pytest
 import shutil
 import subprocess as sp
 import sys
-import tempfile
+from pathlib import Path
+from typing import Any, Generator
 
 
 @pytest.fixture
-def setup_single_genome():
-    temp_dir = tempfile.mkdtemp()
+def setup_single_genome(tmp_path: Path) -> Generator[tuple[Path, Path], Any, None]:
+    reads_fp = Path(".tests/data/reads/")
 
-    reads_fp = os.path.abspath(".tests/data/reads/")
+    project_dir = tmp_path / "project"
 
-    project_dir = os.path.join(temp_dir, "project/")
+    sp.check_output(["sunbeam", "init", "--data_fp", str(reads_fp), str(project_dir)])
 
-    sp.check_output(["sunbeam", "init", "--data_fp", reads_fp, project_dir])
-
-    config_fp = os.path.join(project_dir, "sunbeam_config.yml")
+    config_fp = project_dir / "sunbeam_config.yml"
     config_str = f"sbx_demic: {{single_genome: true}}"
     sp.check_output(
         [
@@ -30,19 +28,18 @@ def setup_single_genome():
         ]
     )
 
-    yield temp_dir, project_dir
-
-    shutil.rmtree(temp_dir)
+    yield tmp_path, project_dir
 
 
 @pytest.fixture
-def run_sunbeam_single_genome(setup_single_genome):
-    temp_dir, project_dir = setup_single_genome
+def run_sunbeam_single_genome(setup_single_genome: tuple[Path, Path]) -> Generator[tuple[Path, Path], Any, None]:
+    tmp_path, project_dir = setup_single_genome
 
-    output_fp = os.path.join(project_dir, "sunbeam_output")
+    output_fp = project_dir / "sunbeam_output"
+    logs_fp = output_fp / "logs"
+    stats_fp = project_dir / "stats"
 
     try:
-        # Run the test job
         sp.check_output(
             [
                 "sunbeam",
@@ -50,36 +47,36 @@ def run_sunbeam_single_genome(setup_single_genome):
                 "--conda-frontend",
                 "conda",
                 "--profile",
-                project_dir,
+                str(project_dir),
                 "all_demic",
                 "--directory",
-                temp_dir,
+                str(tmp_path),
             ]
         )
     except sp.CalledProcessError as e:
-        shutil.copytree(os.path.join(output_fp, "logs/"), "logs/")
-        shutil.copytree(os.path.join(project_dir, "stats/"), "stats/")
-        sys.exit(e)
+        try:
+            shutil.copytree(logs_fp, "single_logs/")
+            shutil.copytree(stats_fp, "single_stats/")
+        except FileExistsError:
+            sys.stderr.write("Logs already exist")
+        raise e
 
     try:
-        shutil.copytree(os.path.join(output_fp, "logs/"), "logs/")
-        shutil.copytree(os.path.join(project_dir, "stats/"), "stats/")
+        shutil.copytree(logs_fp, "single_logs/")
+        shutil.copytree(stats_fp, "single_stats/")
     except FileExistsError:
         pass
 
-    benchmarks_fp = os.path.join(project_dir, "stats/")
-
-    yield output_fp, benchmarks_fp
+    yield output_fp, stats_fp
 
 
-def test_full_run(run_sunbeam_single_genome):
-    output_fp, benchmarks_fp = run_sunbeam_single_genome
+def test_full_run(run_sunbeam_single_genome: tuple[Path, Path]) -> None:
+    output_fp, stats_fp = run_sunbeam_single_genome
 
-    all_PTR_fp = os.path.join(output_fp, "mapping/demic/all_PTR.txt")
+    all_PTR_fp = output_fp / "mapping" / "demic" / "all_PTR.txt"
 
-    # Check output
-    assert os.path.exists(all_PTR_fp)
-    assert os.stat(all_PTR_fp).st_size > 0
+    assert all_PTR_fp.exists()
+    assert all_PTR_fp.stat().st_size > 0
 
     with open(all_PTR_fp) as f:
         f.readline()  # Is header
