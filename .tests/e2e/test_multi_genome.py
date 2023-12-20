@@ -20,7 +20,9 @@ def setup_multi_genome(tmp_path: Path) -> Generator[tuple[Path, Path], Any, None
 
 
 @pytest.fixture
-def run_sunbeam_multi_genome(setup_multi_genome: tuple[Path, Path]) -> Generator[tuple[Path, Path], Any, None]:
+def run_sunbeam_multi_genome(
+    setup_multi_genome: tuple[Path, Path]
+) -> Generator[tuple[Path, Path], Any, None]:
     tmp_path, project_dir = setup_multi_genome
 
     output_fp = project_dir / "sunbeam_output"

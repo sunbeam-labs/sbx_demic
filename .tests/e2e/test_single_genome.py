@@ -32,7 +32,9 @@ def setup_single_genome(tmp_path: Path) -> Generator[tuple[Path, Path], Any, Non
 
 
 @pytest.fixture
-def run_sunbeam_single_genome(setup_single_genome: tuple[Path, Path]) -> Generator[tuple[Path, Path], Any, None]:
+def run_sunbeam_single_genome(
+    setup_single_genome: tuple[Path, Path]
+) -> Generator[tuple[Path, Path], Any, None]:
     tmp_path, project_dir = setup_single_genome
 
     output_fp = project_dir / "sunbeam_output"
