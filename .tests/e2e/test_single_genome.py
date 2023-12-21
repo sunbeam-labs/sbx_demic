@@ -46,8 +46,6 @@ def run_sunbeam_single_genome(
             [
                 "sunbeam",
                 "run",
-                "--conda-frontend",
-                "conda",
                 "--profile",
                 str(project_dir),
                 "all_demic",
