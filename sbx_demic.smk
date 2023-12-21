@@ -307,7 +307,7 @@ rule aggregate_demic:
     input:
         DEMIC_FP / "DEMIC_OUT",
     output:
-        DEMIC_FP / "all_PTR.txt",
+        DEMIC_FP / "all_PTR.ptr",
     shell:
         """
         cat {input}/*.txt > {output}
