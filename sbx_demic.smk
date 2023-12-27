@@ -325,6 +325,10 @@ rule aggregate_demic:
         DEMIC_FP / "all_PTR.txt",
     shell:
         """
+<<<<<<< HEAD
         echo "sample\testPTR\tcoefficient\tpValue\tcor\tcorrectY" > {output}
         cat {input}/*.ptr >> {output}
+=======
+        cat {input}/*.ptr > {output}
+>>>>>>> origin/master
         """
