@@ -2,7 +2,7 @@
 #    print("Already installed")
 #} else {
     library(devtools)
-    devtools::install_github("Ulthran/DEMIC")
+    devtools::install_github("Ulthran/DEMIC", ref="15-release-demic-100")
 #}
 
 x <- data.frame()

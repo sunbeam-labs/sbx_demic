@@ -1,10 +1,9 @@
 name: sbx_demic_bio_env
 channels:
-  #- bioconda/label/cf201901
   - bioconda
+  - conda-forge
 dependencies:
-  - bowtie2=2.5.1
+  - bowtie2
   - maxbin2
-  - metabat2
-  - libdeflate # metabat2
+  - perl-lwp-simple
   - samtools
