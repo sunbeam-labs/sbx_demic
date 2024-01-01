@@ -1,8 +1,8 @@
 name: sbx_demic_bio_env
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
 dependencies:
   - bowtie2
-  - maxbin2
+  - maxbin2=2.2.7
   - samtools
