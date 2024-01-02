@@ -134,6 +134,6 @@ def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
 # generateN("reference/Bfragilis.fasta", "reads/Bfrag", 3, 25000)
 
 # tiny-multi-reads
-generateN("tiny-ref/akk-genome.fasta", "tiny-multi-reads/Akk", 3, 1500)
-generateN("tiny-ref/Bfragilis.fasta", "tiny-multi-reads/Bfrag", 3, 1500)
-generateN("tiny-ref/Ecoli.fasta", "tiny-multi-reads/Ecoli", 3, 1500)
+# generateN("tiny-ref/akk-genome.fasta", "tiny-multi-reads/Akk", 3, 1500)
+# generateN("tiny-ref/Bfragilis.fasta", "tiny-multi-reads/Bfrag", 3, 1500)
+# generateN("tiny-ref/Ecoli.fasta", "tiny-multi-reads/Ecoli", 3, 1500)

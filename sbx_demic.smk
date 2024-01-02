@@ -144,7 +144,7 @@ rule coassemble_paired_demic:
         runtime=720,
     shell:
         """
-        megahit -1 {input.r1} -2 {input.r2} -t {threads} -o {params.assembly_dir} 2>&1 | tee {log}
+        megahit -1 {input.r1} -2 {input.r2} -t {threads} -o {params.assembly_dir} --tmp-dir /tmp/ 2>&1 | tee {log}
         mv {params.assembly_dir}/final.contigs.fa {output}
         """
 
