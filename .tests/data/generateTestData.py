@@ -111,7 +111,7 @@ def complementRead(read: str) -> str:
 # @param n is the number of read file pairs to create
 def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
     for i in range(n):
-        c = generateTestData(genome, reads + str(i), reads_per_sample, i + 2)
+        c = generateTestData(genome, reads + str(i), reads_per_sample, i / 2 + 2)
         print(f"{reads + str(i)}: {sorted(c.items())}")
 
         with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
@@ -132,6 +132,14 @@ def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
 
 # reads
 # generateN("reference/Bfragilis.fasta", "reads/Bfrag", 3, 25000)
+        
+# new reads
+#generateN("reference/Bfragilis.fasta", "new/Bfrag", 5, 100000)
+
+# new multi-reads
+generateN("reference/Bfragilis.fasta", "new-multi/Bfrag", 3, 100000)
+generateN("reference/Ecoli.fasta", "new-multi/Ecoli", 3, 100000)
+generateN("reference/akk-genome.fasta", "new-multi/Akk", 3, 100000)
 
 # tiny-multi-reads
 # generateN("tiny-ref/akk-genome.fasta", "tiny-multi-reads/Akk", 3, 1500)
