@@ -132,9 +132,9 @@ def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
 
 # reads
 # generateN("reference/Bfragilis.fasta", "reads/Bfrag", 3, 25000)
-        
+
 # new reads
-#generateN("reference/Bfragilis.fasta", "new/Bfrag", 5, 100000)
+# generateN("reference/Bfragilis.fasta", "new/Bfrag", 5, 100000)
 
 # new multi-reads
 generateN("reference/Bfragilis.fasta", "new-multi/Bfrag", 3, 100000)
