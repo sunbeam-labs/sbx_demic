@@ -144,7 +144,7 @@ rule coassemble_paired_demic:
         runtime=720,
     shell:
         """
-        megahit -1 {input.r1} -2 {input.r2} -t {threads} -o {params.assembly_dir} 2>&1 | tee {log}
+        megahit -1 {input.r1} -2 {input.r2} -t {threads} -o {params.assembly_dir} --tmp-dir /tmp/ 2>&1 | tee {log}
         mv {params.assembly_dir}/final.contigs.fa {output}
         """
 
@@ -267,24 +267,23 @@ rule samtools_sort:
 rule install_demic:
     output:
         out=DEMIC_FP / ".installed",
+    log:
+        log=LOG_FP / "install_demic.log",
     conda:
         "envs/demic_env.yml"
     script:
         "scripts/install_demic.R"
 
 
-rule run_demic:
+rule run_pycov3:
     input:
         DEMIC_FP / "sorted",
         COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
-        DEMIC_FP / ".installed",
     output:
-        directory(DEMIC_FP / "DEMIC_OUT"),
+        directory(DEMIC_FP / "pycov3"),
     params:
-        demic=get_demic_path() / "vendor_demic_v1.0.2" / "DEMIC.pl",
         sam_dir=str(DEMIC_FP / "sorted"),
         fasta_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
-        keep_all=Cfg["sbx_demic"]["keepall"],
         extras=Cfg["sbx_demic"]["extras"],
     threads: Cfg["sbx_demic"]["demic_threads"]
     resources:
@@ -293,14 +292,30 @@ rule run_demic:
     conda:
         "envs/demic_env.yml"
     log:
-        LOG_FP / "run_demic.log",
+        LOG_FP / "run_pycov3.log",
     shell:
         """
-        {params.demic} --output_all {params.keep_all} {params.extras} \
-        --thread_num {threads} \
-        -S {params.sam_dir} -F {params.fasta_dir} \
-        -O {output} 2>&1 | tee {log}
+        pip install pycov3
+        pycov3 -S {params.sam_dir} -F {params.fasta_dir} -O {output} -X 2>&1 | tee {log}
         """
+
+
+rule run_demic:
+    input:
+        input=DEMIC_FP / "pycov3",
+        installed=DEMIC_FP / ".installed",
+    output:
+        out=directory(DEMIC_FP / "DEMIC_OUT"),
+    threads: Cfg["sbx_demic"]["demic_threads"]
+    resources:
+        mem_mb=20000,
+        runtime=720,
+    conda:
+        "envs/demic_env.yml"
+    log:
+        LOG_FP / "run_demic.log",
+    script:
+        "scripts/run_demic.R"
 
 
 rule aggregate_demic:
@@ -310,5 +325,6 @@ rule aggregate_demic:
         DEMIC_FP / "all_PTR.txt",
     shell:
         """
-        cat {input}/*.ptr > {output}
+        echo "sample\testPTR\tcoefficient\tpValue\tcor\tcorrectY" > {output}
+        cat {input}/*.ptr >> {output}
         """
