@@ -22,6 +22,14 @@ def get_read(genome: str, start_index: int, read_length: int) -> str:
     else:
         spillover = start_index + read_length - genome_length
         return genome[start_index:] + genome[:spillover]
+    
+def adjust_genome(genome: str, name_str: str) -> str:
+    ref_dict = {"Bacteroides_fragilis_638R_uid84217__NC_016776": 105766, "Bifidobacterium_animalis_lactis_B420_uid163691__NC_017866": 1886, "Streptomyces_scabiei_87_22_uid46531__NC_013929": 5138728}
+    for species, start_index in ref_dict.items():
+        if species in name_str:
+            return str(genome[start_index:] + genome[:start_index])
+        
+    return genome
 
 
 # Generates a triangular distribution of reads from input sequence data
@@ -36,6 +44,7 @@ def generateTestData(genome_fp: str, reads: str, num_reads: int, PTR: float) -> 
         for r in genome_f.readlines():
             if r[0] != ">":
                 genome += r.strip()
+    genome = adjust_genome(genome, genome_fp)
 
     with open(reads + "_R1.fastq", "w") as readsF_R1, open(
         reads + "_R2.fastq", "w"
@@ -111,18 +120,20 @@ def complementRead(read: str) -> str:
 # @param n is the number of read file pairs to create
 def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
     for i in range(n):
-        c = generateTestData(genome, reads + str(i), reads_per_sample, i / 2 + 2)
-        print(f"{reads + str(i)}: {sorted(c.items())}")
+        ptr = i / 2 + 2
+        ptr_str = str(ptr).replace(".", "-")
+        c = generateTestData(genome, reads + ptr_str, reads_per_sample, ptr)
+        print(f"{reads + ptr_str}: {sorted(c.items())}")
 
-        with open(reads + str(i) + "_R1.fastq", "rb") as r1, open(
-            reads + str(i) + "_R2.fastq", "rb"
-        ) as r2, gzip.open(reads + str(i) + "_R1.fastq.gz", "wb") as w1, gzip.open(
-            reads + str(i) + "_R2.fastq.gz", "wb"
+        with open(reads + ptr_str + "_R1.fastq", "rb") as r1, open(
+            reads + ptr_str + "_R2.fastq", "rb"
+        ) as r2, gzip.open(reads + ptr_str + "_R1.fastq.gz", "wb") as w1, gzip.open(
+            reads + ptr_str + "_R2.fastq.gz", "wb"
         ) as w2:
             w1.writelines(r1)
             w2.writelines(r2)
-        os.remove(reads + str(i) + "_R1.fastq")
-        os.remove(reads + str(i) + "_R2.fastq")
+        os.remove(reads + ptr_str + "_R1.fastq")
+        os.remove(reads + ptr_str + "_R2.fastq")
 
 
 # multi-reads
@@ -137,11 +148,16 @@ def generateN(genome: str, reads: str, n: int, reads_per_sample: int = 50000):
 # generateN("reference/Bfragilis.fasta", "new/Bfrag", 5, 100000)
 
 # new multi-reads
-generateN("reference/Bfragilis.fasta", "new-multi/Bfrag", 3, 100000)
-generateN("reference/Ecoli.fasta", "new-multi/Ecoli", 3, 100000)
-generateN("reference/akk-genome.fasta", "new-multi/Akk", 3, 100000)
+generateN("reference/Bfragilis.fasta", "new-multi/Bfrag", 3, 25000)
+generateN("reference/Ecoli.fasta", "new-multi/Ecoli", 3, 25000)
+generateN("reference/akk-genome.fasta", "new-multi/Akk", 3, 25000)
 
 # tiny-multi-reads
 # generateN("tiny-ref/akk-genome.fasta", "tiny-multi-reads/Akk", 3, 1500)
 # generateN("tiny-ref/Bfragilis.fasta", "tiny-multi-reads/Bfrag", 3, 1500)
 # generateN("tiny-ref/Ecoli.fasta", "tiny-multi-reads/Ecoli", 3, 1500)
+
+# source-forge multi-reads
+#generateN("source-forge-ref/Bacteroides_fragilis_638R_uid84217__NC_016776.fna", "source-forge-reads/Bfragilis.fastq", 3, 500000)
+#generateN("source-forge-ref/Bifidobacterium_animalis_lactis_B420_uid163691__NC_017866.fna", "source-forge-reads/Bifidobacterium.fastq", 3, 500000)
+#generateN("source-forge-ref/Streptomyces_scabiei_87_22_uid46531__NC_013929.fna", "source-forge-reads/Streptomyces.fastq", 3, 500000)

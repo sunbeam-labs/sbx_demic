@@ -211,19 +211,33 @@ rule maxbin:
         """
 
 
-rule bowtie2_build:
+rule split_dense_contigs:
     input:
         COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
     output:
-        touch(COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed"),
+        directory(COASSEMBLY_DEMIC_FP / "split"),
     params:
         base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
+    #script:
+    #    "scripts/split_dense_contigs.py"
+    shell:
+        """
+        mkdir -p {output}
+        cp {params.base_dir}/*.fasta {output}
+        """
+
+
+rule bowtie2_build:
+    input:
+        COASSEMBLY_DEMIC_FP / "split",
+    output:
+        touch(COASSEMBLY_DEMIC_FP / ".indexed"),
     threads: Cfg["sbx_demic"]["demic_threads"]
     conda:
         "envs/demic_bio_env.yml"
     shell:
         """
-        for f in {params.base_dir}/*.fasta; do
+        for f in {input[0]}/*.fasta; do
             bowtie2-build --threads {threads} $f $f
         done
         """
@@ -231,18 +245,17 @@ rule bowtie2_build:
 
 rule bowtie2:
     input:
-        bin_dir=COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
+        bin_dir=COASSEMBLY_DEMIC_FP / "split",
         reads=expand(
             QC_FP / "decontam" / "{sample}_{rp}.fastq.gz",
             sample=Samples.keys(),
             rp=Pairs,
         ),
-        indexed=COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed",
+        indexed=COASSEMBLY_DEMIC_FP / ".indexed",
     output:
         directory(DEMIC_FP / "raw"),
     threads: Cfg["sbx_demic"]["demic_threads"]
     params:
-        base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
         reads_dir=str(QC_FP / "decontam"),
     conda:
         "envs/demic_bio_env.yml"
@@ -296,7 +309,7 @@ rule run_pycov3:
     shell:
         """
         pip install pycov3
-        pycov3 -S {params.sam_dir} -F {params.fasta_dir} -O {output} -X 2>&1 | tee {log}
+        pycov3 -S {params.sam_dir} -F {params.fasta_dir} -O {output} -X {params.extras} 2>&1 | tee {log}
         """
 
 
