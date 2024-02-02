@@ -7,3 +7,4 @@ dependencies:
   - maxbin2
   - perl-lwp-simple
   - samtools >=1.19
+  - pycov3

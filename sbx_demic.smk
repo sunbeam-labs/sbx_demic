@@ -218,13 +218,8 @@ rule split_dense_contigs:
         directory(COASSEMBLY_DEMIC_FP / "split"),
     params:
         base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
-    #script:
-    #    "scripts/split_dense_contigs.py"
-    shell:
-        """
-        mkdir -p {output}
-        cp {params.base_dir}/*.fasta {output}
-        """
+    script:
+        "scripts/split_dense_contigs.py"
 
 
 rule bowtie2_build:
@@ -339,5 +334,5 @@ rule aggregate_demic:
     shell:
         """
         echo "sample\testPTR\tcoefficient\tpValue\tcor\tcorrectY" > {output}
-        cat {input}/*.ptr >> {output}
+        tail -n +1 {input}/*.ptr >> {output}
         """
