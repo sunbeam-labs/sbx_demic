@@ -1,0 +1,5 @@
+name: demic_ref_env
+channels:
+  - conda-forge
+dependencies:
+  - perl
