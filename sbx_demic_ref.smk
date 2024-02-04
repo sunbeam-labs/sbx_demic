@@ -41,15 +41,22 @@ rule install_opera_ms:
     shell:
         """
         cd {params.demic_fp}
-        git clone https://github.com/CSB5/OPERA-MS.git
+
+        if [ ! -d "OPERA-MS" ]; then
+            git clone https://github.com/CSB5/OPERA-MS.git
+        fi
+        
         cd OPERA-MS
+
         make
+        perl tools_opera_ms/install_perl_module.pl
         perl OPERA-MS.pl check-dependency
         """
 
+
 rule run_opera_ms:
     input:
-        DEMIC_REF_FP / ".installed",
+        #DEMIC_REF_FP / ".installed",
         reads=expand(QC_FP / "decontam" / "{{sample}}_{rp}.fastq.gz", rp=Pairs),
         contigs=Cfg["sbx_demic"]["ref_fp"],
     output:
@@ -57,8 +64,11 @@ rule run_opera_ms:
     params:
         demic_fp=str(get_demic_path()),
         threads=Cfg["sbx_demic"]["demic_threads"],
-    conda:
-        "envs/demic_ref_env.yml"
+    #conda:
+    #    "envs/demic_ref_env.yml"
+    container:
+        "docker://lorenzgerber/operams"
+    threads: 8
     shell:
         """
         cd {params.demic_fp}/OPERA-MS
