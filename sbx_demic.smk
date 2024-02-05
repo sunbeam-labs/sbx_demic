@@ -213,7 +213,7 @@ rule maxbin:
 
 rule bowtie2_build:
     input:
-        COASSEMBLY_DEMIC_FP / "split",
+        COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
     output:
         touch(COASSEMBLY_DEMIC_FP / ".indexed"),
     threads: Cfg["sbx_demic"]["demic_threads"]
@@ -229,7 +229,7 @@ rule bowtie2_build:
 
 rule bowtie2:
     input:
-        bin_dir=COASSEMBLY_DEMIC_FP / "split",
+        bin_dir=COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
         reads=expand(
             QC_FP / "decontam" / "{sample}_{rp}.fastq.gz",
             sample=Samples.keys(),
@@ -255,8 +255,6 @@ rule samtools_sort:
     threads: Cfg["sbx_demic"]["demic_threads"]
     conda:
         "envs/demic_bio_env.yml"
-    log:
-        str(DEMIC_FP / "logs" / "samtools.error"),
     script:
         "scripts/samtools_sort.py"
 

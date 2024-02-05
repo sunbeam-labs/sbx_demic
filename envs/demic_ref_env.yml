@@ -2,12 +2,5 @@ name: demic_ref_env
 channels:
   - conda-forge
   - bioconda
-  #- compbiocore
 dependencies:
-  - python =3.9
-  - perl-app-cpanminus # for installing perl modules in Opera-MS
-  - perl #=5.26.2
-  #- perl-switch
-  #- bioconda::perl-file-which
-  #- bioconda::perl-statistics-basic
-  #- bioconda::perl-statistics-r
+  - spades

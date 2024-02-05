@@ -5,4 +5,3 @@ sbx_demic:
   single_genome: false # Switch to true if your samples only contain a single species
   extras: "" # Parameters passed to DEMIC.pl
   ref_fp: "" # Path to reference genome
-  operams_db_fp: "" # Path to Opera-MS database
