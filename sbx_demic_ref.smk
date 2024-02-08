@@ -30,6 +30,15 @@ rule all_demic_ref:
         all=DEMIC_REF_FP / "all_PTR.txt",
         contig=DEMIC_REF_FP / "contig_PTR.txt",
         sample=DEMIC_REF_FP / "sample_PTR.txt",
+        hist=expand(
+            DEMIC_REF_FP / "coverage" / "{sample}_001.txt", sample=Samples.keys()
+        ),
+        depth=expand(
+            DEMIC_REF_FP / "coverage" / "{sample}_001.depth", sample=Samples.keys()
+        ),
+        tsv=expand(
+            DEMIC_REF_FP / "coverage" / "{sample}_001.tsv", sample=Samples.keys()
+        ),
 
 
 rule spades_assemble_with_ref:
@@ -112,6 +121,23 @@ rule samtools_sort_demic_ref:
         """
 
 
+rule samtools_coverage_ref:
+    input:
+        DEMIC_REF_FP / "sorted" / "{sample}_001.sam",
+    output:
+        hist=DEMIC_REF_FP / "coverage" / "{sample}_001.txt",
+        depth=DEMIC_REF_FP / "coverage" / "{sample}_001.depth",
+        tsv=DEMIC_REF_FP / "coverage" / "{sample}_001.tsv",
+    conda:
+        "envs/demic_bio_env.yml"
+    shell:
+        """
+        samtools coverage {input} -m -o {output.hist}
+        samtools coverage {input} -D -o {output.depth}
+        samtools coverage {input} -o {output.tsv}
+        """
+
+
 rule run_pycov3_ref:
     input:
         sams=expand(DEMIC_REF_FP / "sorted" / "{sample}_001.sam", sample=Samples.keys()),
@@ -163,7 +189,9 @@ rule run_demic_ref:
 
 rule aggregate_demic_ref:
     input:
-        all=expand(DEMIC_REF_FP / "DEMIC_OUT" / "spades.001.all.ptr", sample=Samples.keys()),
+        all=expand(
+            DEMIC_REF_FP / "DEMIC_OUT" / "spades.001.all.ptr", sample=Samples.keys()
+        ),
         contig=expand(
             DEMIC_REF_FP / "DEMIC_OUT" / "spades.001.contig.ptr", sample=Samples.keys()
         ),
