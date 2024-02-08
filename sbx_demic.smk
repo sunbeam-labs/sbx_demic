@@ -215,15 +215,13 @@ rule bowtie2_build:
     input:
         COASSEMBLY_DEMIC_FP / "max_bin" / "max_bin",
     output:
-        touch(COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed"),
-    params:
-        base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
+        touch(COASSEMBLY_DEMIC_FP / ".indexed"),
     threads: Cfg["sbx_demic"]["demic_threads"]
     conda:
         "envs/demic_bio_env.yml"
     shell:
         """
-        for f in {params.base_dir}/*.fasta; do
+        for f in {input[0]}/*.fasta; do
             bowtie2-build --threads {threads} $f $f
         done
         """
@@ -237,12 +235,11 @@ rule bowtie2:
             sample=Samples.keys(),
             rp=Pairs,
         ),
-        indexed=COASSEMBLY_DEMIC_FP / "max_bin" / ".indexed",
+        indexed=COASSEMBLY_DEMIC_FP / ".indexed",
     output:
         directory(DEMIC_FP / "raw"),
     threads: Cfg["sbx_demic"]["demic_threads"]
     params:
-        base_dir=str(COASSEMBLY_DEMIC_FP / "max_bin"),
         reads_dir=str(QC_FP / "decontam"),
     conda:
         "envs/demic_bio_env.yml"
@@ -258,8 +255,6 @@ rule samtools_sort:
     threads: Cfg["sbx_demic"]["demic_threads"]
     conda:
         "envs/demic_bio_env.yml"
-    log:
-        str(DEMIC_FP / "logs" / "samtools.error"),
     script:
         "scripts/samtools_sort.py"
 
@@ -296,7 +291,7 @@ rule run_pycov3:
     shell:
         """
         pip install pycov3
-        pycov3 -S {params.sam_dir} -F {params.fasta_dir} -O {output} -X 2>&1 | tee {log}
+        pycov3 -S {params.sam_dir} -F {params.fasta_dir} -O {output} -X {params.extras} 2>&1 | tee {log}
         """
 
 
@@ -326,5 +321,5 @@ rule aggregate_demic:
     shell:
         """
         echo "sample\testPTR\tcoefficient\tpValue\tcor\tcorrectY" > {output}
-        cat {input}/*.ptr >> {output}
+        tail -n +1 {input}/*.ptr >> {output}
         """

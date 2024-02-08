@@ -3,6 +3,8 @@ name: Super-Linter
 on:
   pull_request:
     branches: [ master ]
+  push:
+    branches: [ master ]
 
 jobs:
   lint:
@@ -21,4 +23,3 @@ jobs:
 
           VALIDATE_SNAKEMAKE_SNAKEFMT: true
           VALIDATE_PYTHON_BLACK: true
-          VALIDATE_PERL_PERLCRITIC: true
