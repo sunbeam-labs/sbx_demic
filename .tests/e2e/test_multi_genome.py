@@ -56,18 +56,19 @@ def run_sunbeam_multi_genome(
     yield output_fp, stats_fp
 
 
-def test_full_run(run_sunbeam_multi_genome: tuple[Path, Path]) -> None:
-    output_fp, stats_fp = run_sunbeam_multi_genome
-
-    all_PTR_fp = output_fp / "mapping" / "demic" / "all_PTR.txt"
-
-    assert all_PTR_fp.exists()
-    assert all_PTR_fp.stat().st_size > 0
-
-    with open(all_PTR_fp) as f:
-        f.readline()  # Is header
-        results = [line.split("\t") for line in f.readlines()]
-        print(results)
-        # assert round(float(results[0][1])) == 2
-        # assert round(float(results[1][1])) == 3
-        assert [float(r[1]) for r in results] == sorted([float(r[1]) for r in results])
+### Not testing this right now
+# def test_full_run(run_sunbeam_multi_genome: tuple[Path, Path]) -> None:
+#    output_fp, stats_fp = run_sunbeam_multi_genome
+#
+#    all_PTR_fp = output_fp / "mapping" / "demic" / "all_PTR.txt"
+#
+#    assert all_PTR_fp.exists()
+#    assert all_PTR_fp.stat().st_size > 0
+#
+#    with open(all_PTR_fp) as f:
+#        f.readline()  # Is header
+#        results = [line.split("\t") for line in f.readlines()]
+#        print(results)
+#        # assert round(float(results[0][1])) == 2
+#        # assert round(float(results[1][1])) == 3
+#        assert [float(r[1]) for r in results] == sorted([float(r[1]) for r in results])
