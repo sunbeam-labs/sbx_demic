@@ -28,11 +28,11 @@ jobs:
         if: always()
         run: |
           tail -n +1 single_logs/*
-          tail -n +1 multi_logs/*
+        #  tail -n +1 multi_logs/*
       
       - name: Dump Stats
         shell: bash
         if: always()
         run: |
           cat single_stats/*
-          cat multi_stats/*
+        #  cat multi_stats/*
